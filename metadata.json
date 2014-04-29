@@ -1,0 +1,20 @@
+{
+  "name":"Desktop GUI plugin",
+  "version": "0.1",
+  "id": "desktop-gui",
+  "roles": [
+        "gui",
+        {
+            "name":"config",
+            "flags": "system|hidden"
+        }
+    ],
+    "dependencies": [
+       "browser",
+       {
+         "role": "mediaplayer",
+         "required": false
+       }
+    ],
+    "flags": "gui"
+}

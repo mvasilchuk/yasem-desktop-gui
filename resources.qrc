@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/desktop/gui">
+        <file alias="js/main.js">res/js/main.js</file>
+        <file alias="img/white-highlight.png">res/img/white-highlight.png</file>
+        <file alias="css/main.css">res/css/main.css</file>
+        <file alias="html/profiles.html">res/html/profiles.html</file>
+        <file alias="html/profile_config.html">res/html/profile_config.html</file>
+        <file alias="js/profile_config.js">res/js/profile_config.js</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,12 @@
+#ifndef DESKTOPGUI_GLOBAL_H
+#define DESKTOPGUI_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(DESKTOPGUI_LIBRARY)
+#  define DESKTOPGUISHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define DESKTOPGUISHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // DESKTOPGUI_GLOBAL_H

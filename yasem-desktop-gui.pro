@@ -43,7 +43,9 @@ OTHER_FILES += \
     res/img/white-highlight.png \
     res/js/main.js \
     res/html/profile_config.html \
-    res/js/profile_config.js
+    res/js/profile_config.js \
+    LICENSE \
+    README.md
 
 FORMS    +=
 

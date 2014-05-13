@@ -176,6 +176,7 @@ Main.fillStbTypes = function()
         var link = Main.createElement('a', {
             'class':    'stb-type-block',
             'href':       'javascript:void(0)',
+            '$id':        stbTypes[index].id,
             '$stbType':   stbTypes[index].classId,
             'onclick':    createProfile
         }, [
@@ -232,10 +233,35 @@ Main.showStbTypesList = function(show)
     }
 };
 
+Main.getSelectedProfile = function()
+{
+    var el = document.activeElement;
+    console.log('Active element: ' + el);
+    if(/profile-block/.test(el.className))
+    {
+        console.log(el);
+        return {
+            'uid': /^profile-(.*?)$/.exec(el.id)[1]
+        }
+    }
+
+    return null;
+};
+
 Main.onKeyPress = function(/** KeyEvent */event)
 {
     switch(event.keyCode)
     {
+        case 11: //F1 / RED
+        {
+
+            var el = Main.getSelectedProfile();
+            if(el)
+                window.open('profile_config.html#:' + el.uid);
+
+            console.log(el);
+            break;
+        }
         case 27: // ESC
         {
             Main.showStbTypesList(false);

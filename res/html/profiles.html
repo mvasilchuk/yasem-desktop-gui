@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="../css/main.css" type="text/css">
 <script src="../js/main.js" type="application/javascript"></script>
 </head>
-<body onload="Main.onLoad()" onkeypress="Main.onKeyPress(event);">
+<body onload="Main.onLoad()" onkeypress="Main.onKeyPress(event)">
 
 <div id="profiles-outer-container">
     <div id="profile-blocks">
@@ -44,7 +44,13 @@
     <div class="new-profile-inner-container">
         <div class="tr create-new-profile-title">Create new profile</div>
         <div class="close-window" onclick="Main.showStbTypesList(false);">X</div>
-        <div id="new-profile-blocks">
+        <div id="new-profile-blocks"></div>
+    </div>
+</div>
+
+<div class="profiles-hint">
+    <div class="hint-item">
+        Press F1 to change profile
     </div>
 </div>
 

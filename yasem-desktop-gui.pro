@@ -4,15 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+VERSION = 1.0.0
 
-#VER_MAJ = 1
-#VER_MIN = 0
-#VER_PAT = 0
+QT       += core gui widgets
 
 TARGET = yasem-desktop-gui
 TEMPLATE = lib
-CONFIG += plugin
 
 CONFIG += c++11
 

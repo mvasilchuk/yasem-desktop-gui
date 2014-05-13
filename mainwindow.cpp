@@ -132,10 +132,12 @@ void MainWindow::setAppFullscreen(bool fullscreen)
 {
     if(fullscreen) {
         this->setWindowState(Qt::WindowFullScreen);
+        browser()->resize();
         statusBar->hide();
         menuBar->hide();
     } else {
         this->setWindowState(Qt::WindowNoState);
+        browser()->resize();
         statusBar->show();
         menuBar->show();
     }

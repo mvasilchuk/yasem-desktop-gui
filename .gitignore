@@ -60,3 +60,5 @@ Makefile*
 
 *.autosave
 .directory
+
+.idea

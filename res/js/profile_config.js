@@ -53,8 +53,8 @@ Profile.saveConfig = function()
 
     //__GUI__.createProfile(this.$stbType, JSON.stringify(data));
     __GUI__.saveProfile(this.profile, JSON.stringify(data));
-    opener.Main.showStbTypesList(false);
-    opener.Main.loadProfiles();
+    opener.Profiles.showStbTypesList(false);
+    opener.Profiles.loadProfiles();
     window.close();
 
     console.log();
@@ -70,9 +70,7 @@ Profile.fillTable = function()
     {
         var conf = config[index];
 
-        var value;
         var elemTag;
-        var type = '';
         var options = [];
 
         console.log(conf  + typeof conf.value);
@@ -93,7 +91,7 @@ Profile.fillTable = function()
                     {
                         name: 'false',
                         value: 'false'
-                    },
+                    }
                 ];
 
                 break;
@@ -105,7 +103,7 @@ Profile.fillTable = function()
             }
         }
 
-        var tr = Main.createElement('tr',
+        var tr = Profiles.createElement('tr',
             {
                 'class': 'config-row'
             },

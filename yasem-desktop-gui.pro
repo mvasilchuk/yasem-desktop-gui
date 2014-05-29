@@ -20,13 +20,15 @@ INCLUDEPATH += ../yasem-core
 SOURCES += desktopgui.cpp \
     mainwindow.cpp \
     guiconfigprofile.cpp \
-    guistbobject.cpp
+    guistbobject.cpp \
+    settingsdialog.cpp
 
 HEADERS += desktopgui.h\
     desktopgui_global.h \
     mainwindow.h \
     guiconfigprofile.h \
-    guistbobject.h
+    guistbobject.h \
+    settingsdialog.h
 
 unix {
     target.path = /usr/lib
@@ -44,7 +46,8 @@ OTHER_FILES += \
     LICENSE \
     README.md
 
-FORMS    +=
+FORMS    += \
+    settingsdialog.ui
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_PLUGIN_DIR

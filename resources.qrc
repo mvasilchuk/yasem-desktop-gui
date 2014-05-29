@@ -6,5 +6,8 @@
         <file alias="html/profiles.html">res/html/profiles.html</file>
         <file alias="html/profile_config.html">res/html/profile_config.html</file>
         <file alias="js/profile_config.js">res/js/profile_config.js</file>
+        <file alias="js/profiles.js">res/js/profiles.js</file>
+        <file alias="css/profiles.css">res/css/profiles.css</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

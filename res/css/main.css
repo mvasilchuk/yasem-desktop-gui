@@ -1,141 +1,106 @@
 body {
-    background-color: lightgrey;
+  background-color: lightcyan;
 }
-
-select {
-    background-color: lightgrey;
+.items {
+  border: 1px solid blue;
+  position: absolute;
+  width: 1386px;
+  height: 462px;
+  left: 50%;
+  top: 50%;
+  margin-top: -225px;
+  margin-left: -675px;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
 }
-
-#profiles-outer-container {
-
+.items .item {
+  width: 450px;
+  height: 450px;
+  min-width: 450px;
+  min-height: 450px;
+  position: relative;
+  margin: 5px;
+  border-radius: 20px;
+  border: 1px solid #9999ff;
+  box-shadow: inset 0px 0px 20px 10px #9999ff;
 }
-
-#profile-blocks
-{
-    position: absolute;
-    width: 100%;
-    height: 100%;
+.items .item.selected,
+.items .item:hover {
+  border: 1px solid #1a1aff;
+  box-shadow: inset 0px 0px 20px 10px #1a1aff;
+  cursor: pointer;
 }
-
-.stb-type-block, .profile-block
-{
-    width: 200px;
-    height: 200px;
-    float: left;
-    margin: 10px;
-    padding: 10px;
-    display: block;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    color: black;
-    background: #c3eafb url('../img/white-highlight.png') top left repeat-x;
-    border: 2px solid #b5d9ea;
-    border-radius: 5px;
-    box-shadow: rgba(0,0,0,0.5) 2px 2px 2px;
+.items .item.hidden {
+  display: none;
 }
-
-.stb-type-block:hover, .stb-type-block:focus, .profile-block:hover, .profile-block:focus
-{
-    background-color: #cee3ac;
-    border-color: #b8da83;
+.items .item .image {
+  width: 270px;
+  height: 270px;
+  margin-left: 90px;
+  margin-top: 20px;
 }
-
-.profile-image {
-    border: 1px dotted green;
-    width: 128px;
-    height: 128px;
-    margin: auto;
-    position: relative;
-    display: block;
+.items .item .image img {
+  width: 270px;
+  height: 270px;
+  border: 1px solid blue;
 }
-
-.stb-type-title, .profile-name {
-    font: 18pt Arial, Geneva, Helvetica, sans-serif;
-    font-weight: bold;
+.items .item .title {
+  width: 405px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 22.5px;
+  margin-right: 22.5px;
+  margin-top: 20px;
+  text-align: center;
 }
-
-.ellipsis {
-    white-space: nowrap;
-    width: 100%;
-    overflow: hidden;
-    text-overflow:    ellipsis;
+.items .item .type {
+  width: 405px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 22.5px;
+  margin-right: 22.5px;
+  margin-top: 20px;
+  text-align: center;
 }
-
-.profile-id {
-    font: 10pt Arial, Geneva, Helvetica, sans-serif;
+.items .item .parent_mark {
+  position: absolute;
+  border: 1px solid blue;
+  width: 50px;
+  height: 50px;
+  bottom: 20px;
+  right: 20px;
 }
-
-.profile-classId {
-    font: 10pt Arial, Geneva, Helvetica, sans-serif;
+.items .item .child_mark {
+  position: absolute;
+  border: 1px solid blue;
+  width: 30px;
+  height: 30px;
+  top: 20px;
+  left: 20px;
 }
-
-.profile-url {
-    font: 10pt Arial, Geneva, Helvetica, sans-serif;
+header .logo {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 300px;
+  height: 200px;
+  display: block;
 }
-
-#new-profile-container {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    display: none;
+footer {
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  width: 100%;
 }
-
-.new-profile-inner-container {
-    position: relative;
-    left: -50%;
-    margin-top: -50%;
-    border: 2px dotted gray;
-    padding: 5px;
+footer .copyright {
+  position: absolute;
+  text-align: left;
+  left: 50px;
 }
-
-#new-profile-blocks {
-    display: block;
-    height: 240px;
-}
-
-.close-window {
-    position: absolute;
-    right: 12px;
-    top: 4px;
-    width: 28px;
-    height: 28px;
-    color: white;
-    font-size: 22pt;
-    border: 1px solid azure;
-    text-align: center;
-    vertical-align: middle;
-    font-family: monospace;
-    cursor: pointer;
-}
-
-.create-new-profile-title {
-    height: 28px;
-}
-
-.config-row {
-
-}
-
-.config-row *, button {
-    font-size: 36pt;
-}
-
-.config-form button {
-     background-color: antiquewhite;
-     color: black;
-}
-
-.config-form button:focus, .config-form button:hover {
-   outline: none;
-   background-color: blue;
-   border: 4px solid blue;
-   color: aliceblue;
-}
-
-.profiles-hint {
-    position: absolute;
-    bottom: 50px;
-    font-size: 26pt;
-    left: 50px;
+footer .version {
+  position: absolute;
+  text-align: right;
+  right: 50px;
 }

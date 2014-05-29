@@ -91,6 +91,7 @@ public slots:
 
     void addErrorToList(const QString &msg);
 
+    void methodNotImplementedHandler(const QString &name);
 };
 
 }

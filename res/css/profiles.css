@@ -1,0 +1,141 @@
+body {
+    background-color: lightgrey;
+}
+
+select {
+    background-color: lightgrey;
+}
+
+#profiles-outer-container {
+
+}
+
+#profile-blocks
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.stb-type-block, .profile-block
+{
+    width: 200px;
+    height: 200px;
+    float: left;
+    margin: 10px;
+    padding: 10px;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    color: black;
+    background: #c3eafb url('../img/white-highlight.png') top left repeat-x;
+    border: 2px solid #b5d9ea;
+    border-radius: 5px;
+    box-shadow: rgba(0,0,0,0.5) 2px 2px 2px;
+}
+
+.stb-type-block:hover, .stb-type-block:focus, .profile-block:hover, .profile-block:focus
+{
+    background-color: #cee3ac;
+    border-color: #b8da83;
+}
+
+.profile-image {
+    border: 1px dotted green;
+    width: 128px;
+    height: 128px;
+    margin: auto;
+    position: relative;
+    display: block;
+}
+
+.stb-type-title, .profile-name {
+    font: 18pt Arial, Geneva, Helvetica, sans-serif;
+    font-weight: bold;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    text-overflow:    ellipsis;
+}
+
+.profile-id {
+    font: 10pt Arial, Geneva, Helvetica, sans-serif;
+}
+
+.profile-classId {
+    font: 10pt Arial, Geneva, Helvetica, sans-serif;
+}
+
+.profile-url {
+    font: 10pt Arial, Geneva, Helvetica, sans-serif;
+}
+
+#new-profile-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: none;
+}
+
+.new-profile-inner-container {
+    position: relative;
+    left: -50%;
+    margin-top: -50%;
+    border: 2px dotted gray;
+    padding: 5px;
+}
+
+#new-profile-blocks {
+    display: block;
+    height: 240px;
+}
+
+.close-window {
+    position: absolute;
+    right: 12px;
+    top: 4px;
+    width: 28px;
+    height: 28px;
+    color: white;
+    font-size: 22pt;
+    border: 1px solid azure;
+    text-align: center;
+    vertical-align: middle;
+    font-family: monospace;
+    cursor: pointer;
+}
+
+.create-new-profile-title {
+    height: 28px;
+}
+
+.config-row {
+
+}
+
+.config-row *, button {
+    font-size: 36pt;
+}
+
+.config-form button {
+     background-color: antiquewhite;
+     color: black;
+}
+
+.config-form button:focus, .config-form button:hover {
+   outline: none;
+   background-color: blue;
+   border: 4px solid blue;
+   color: aliceblue;
+}
+
+.profiles-hint {
+    position: absolute;
+    bottom: 50px;
+    font-size: 26pt;
+    left: 50px;
+}

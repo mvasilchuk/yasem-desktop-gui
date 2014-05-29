@@ -1,271 +1,268 @@
-
-function Main()
-{
-
-}
-
-Main.tr = function(name)
-{
-    return this.translations[name] || name;
+var KEY_CODE = {
+    LEFT: 37,
+    TOP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+    ENTER: 13,
+    ESC: 27
 };
 
-Main.createElement = function(tag, attrs, children)
-{
-    var elem = document.createElement(tag);
+Main = (function() {
+    'use strict';
 
-    attrs = attrs || {};
-    for(var id in attrs)
+    var menu_container = null;
+    var current_menu = 'main-menu';
+    var current_menu_id = '';
+
+    var PAGE_STATES = {
+        MENU: 0,
+        PAGE: 1
+    };
+
+    var menu_stack = [];
+
+    var page_state = PAGE_STATES.MENU;
+
+    var items_visible = 3;
+    var central_item_id = 1;
+
+    var menu_list = {
+        'main-menu': {
+            items: {
+                'id-0' : {
+                    image: '',
+                    title: 'ITEM 0',
+                    type: 'type 0',
+                    submenu: 'submenu-1'
+                },
+                'id-1' : {
+                    image: '',
+                    title: 'ITEM 1',
+                    type: 'type 1'
+                },
+                'id-2' : {
+                    image: '',
+                    title: 'ITEM 2',
+                    type: 'type 2'
+                },
+                'id-3' : {
+                    image: '',
+                    title: 'ITEM 3',
+                    type: 'type 3'
+                },
+                'id-4': {
+                    image: '',
+                    title: 'ITEM 4',
+                    type: 'type 4'
+                }
+            }
+
+        },
+        'submenu-1': {
+            items: {
+                'sub-id-0': {
+                    image: '',
+                    title: 'submenu-0',
+                    type: 'subtype-0'
+                }
+            }
+        }
+    };
+
+    function _createNode(type, jsonData, text)
     {
-        if(attrs[id] && attrs.hasOwnProperty(id))
+        var el = document.createElement(type);
+        for(var id in jsonData)
         {
-            switch(id)
-            {
-                case    'innerHTML':       elem.innerHTML  = attrs[id]; break;
-                case    'onclick':         elem.onclick    = attrs[id]; break;
-                case    'options': {
-                    attrs[id].forEach(function(item)
-                    {
-                        elem.appendChild(
-                            Main.createElement('option', {
-                                'innerHTML': item.name,
-                                'value': item.value
-                            })
-                        );
-                    });
-                    break;
+            el.setAttribute(id, jsonData[id]);
+        }
+        if(typeof text != 'undefined')
+        {
+            if(typeof el.innerHTML != 'undefined')
+                el.innerHTML = text;
+            else if(typeof el.innerText != 'undefined')
+                el.innerText  = text;
+            else console.error('Unable to set inner value to item', el);
+        }
 
+        return el;
+    }
+
+    return {
+        load: function()
+        {
+            console.log('Loading...');
+
+            menu_container = document.getElementById(current_menu);
+            //var menu_offset = localStorage.getItem('menu_offset');
+            //menu_offset = menu_offset ? parseInt(menu_offset) : 0;
+
+            this.prepare_menu();
+            this.menu_move_side(0);
+
+            document.body.focus();
+
+            console.log('Loading finished');
+        },
+        /**
+         *
+         * @param {string?} menu_name
+         */
+        prepare_menu: function(menu_name)
+        {
+            while(menu_container.hasChildNodes())
+                menu_container.removeChild(menu_container.firstChild);
+
+            if(typeof menu_name !== 'undefined')
+                current_menu = menu_name;
+
+            for(var id in menu_list[current_menu].items)
+            {
+                var menu = menu_list[current_menu].items[id];
+
+                var item = _createNode('div', {'class': 'item', 'id': id});
+                var image = _createNode('div', {'class': 'image'});
+                var img = _createNode('img');
+                image.appendChild(img);
+                var title = _createNode('div', {'class': 'title'}, 'ITEM ' + id);
+                var type = _createNode('div', {'class': 'type'}, 'TYPE ' + id);
+
+                item.appendChild(image);
+                item.appendChild(title);
+                item.appendChild(type);
+
+                if(typeof menu.submenu === 'string')
+                {
+                    var parent_mark = _createNode('div', {'class': 'parent_mark' });
+                    item.appendChild(parent_mark);
+                }
+
+                if(typeof menu_list[current_menu].parent_menu === 'string')
+                {
+                    var child_mark = _createNode('div', {'class': 'child_mark' });
+                    item.appendChild(child_mark);
+                }
+
+                menu_container.appendChild(item);
+            }
+        },
+        /**
+         *
+         * @param {Event} e
+         */
+        onkeydown: function(e)
+        {
+            switch(page_state)
+            {
+                case PAGE_STATES.MENU:
+                {
+                    return this.on_menu_keydown(e);
                 }
                 default:
                 {
-                    if(id[0] == '$')
-                        elem[id] = attrs[id];
-                    else
-                        elem.setAttribute(id, attrs[id]);
-                } break;
+                    console.warn('No key handler for page state', page_state);
+                    break;
+                }
             }
-        }
-    }
 
-    children = children || [];
-    for(var index=0; index < children.length; index++)
-    {
-        var child = children[index];
-        elem.appendChild(Main.createElement(child.tag, child.attrs, child.children));
-    }
-    return elem;
-};
-
-Main.applyTranslations = function()
-{
-    var elements = document.getElementsByClassName('tr');
-    for(var index = 0; index < elements.length; index++)
-    {
-        var el = elements[index];
-        if(el.value)                el.value        = this.tr(el.value);
-        else if(el.innerHTML)       el.innerHTML    = this.tr(el.innerHTML);
-        else if(el.innerText)       el.innerText    = this.tr(el.innerText);
-        else                        console.error('no value found for ' + el);
-    }
-};
-
-Main.onLoad = function()
-{
-
-    Main.loadProfiles();
-
-    this.translations = __GUI__.getTranslations();
-    this.applyTranslations();
-};
-
-Main.loadProfiles = function()
-{
-    var profiles = JSON.parse(__GUI__.getProfilesInfoJson(true));
-    console.log(profiles);
-    var profileBlocks = document.getElementById('profile-blocks');
-    while(profileBlocks.hasChildNodes()) profileBlocks.removeChild(profileBlocks.firstChild);
-
-    for(var index=0; index < profiles.length; index++)
-    {
-        var profile = /** @type Profile */ profiles[index];
-        var child  = this.createProfileBlock(profile);
-        profileBlocks.appendChild(child);
-
-        if(index == 0) child.focus();
-    }
-};
-
-
-Main.createProfileBlock = function(/** @type Profile */profile)
-{
-    var children = [
+        },
+        on_menu_keydown: function(e)
         {
-            tag:    'img',
-            attrs:  {
-                'class':  'profile-image',
-                'src': profile.image,
-                'onclick': function(e) {
-                    //window.open('profile_config.html#' + profile.classId + ":" + profile.id.replace('-', '.'));
-                    //e.preventDefault();
-                    //return true;
+            switch(e.keyCode)
+            {
+                case KEY_CODE.LEFT:
+                {
+                    this.menu_move_side(-1);
+                    break;
+                }
+                case KEY_CODE.TOP:
+                {
+                    break;
+                }
+                case KEY_CODE.RIGHT:
+                {
+                    this.menu_move_side(1);
+                    break;
+                }
+                case KEY_CODE.DOWN:
+                {
+                    break;
+                }
+                case KEY_CODE.ENTER: {
+                    var menu = menu_list[current_menu].items[current_menu_id];
+                    if(typeof menu.submenu !== 'undefined')
+                    {
+                       var submenu = menu.submenu;
+                       menu_stack.push(current_menu);
+                       menu_list[submenu].parent_menu = current_menu;
+                       this.prepare_menu(submenu);
+                       this.menu_move_side(0);
+                    }
+                    break;
+                }
+                case KEY_CODE.ESC:
+                {
+                    if(menu_stack.length > 0)
+                    {
+                        this.prepare_menu(menu_stack.pop());
+                        this.menu_move_side(0);
+                    }
+                    else
+                        console.warn('No menu in stack!');
+                    break;
                 }
             }
         },
+        menu_move_side: function(offset)
         {
-            tag:    'div',
-            attrs:  {
-                'innerHTML': profile.name,
-                'class': 'profile-name ellipsis'
-            }
-        }
-    ];
+            var elements = document.getElementsByClassName('item');
 
-    if(profile.id != -1)
-    {
-        children.push({
-            tag:    'div',
-            attrs:  {
-                'innerHTML': profile.classId,
-                'class': 'profile-classId ellipsis'
-            }
-        });
-
-        children.push({
-            tag: 'div',
-            attrs: {
-                'innerHTML': profile.url,
-                'class': 'profile-url ellipsis'
-            }
-        });
-    }
-
-    return Main.createElement('a',{
-        'id':       'profile-' + profile.id,
-        'class':    'profile-block',
-        'href':     'javascript:void(0)',
-        'onclick': function()
-        {
-            console.log(profile.id);
-            if(profile.id == -1)
+            console.log('move_size:' + offset);
+            var index = 0;
+            if(offset >= 0)
             {
-                Main.showStbTypesList(true);
-                return true;
+                for(index = 0; index < offset; index++)
+                {
+                    console.log('appendChild', menu_container.firstElementChild);
+                    menu_container.appendChild(menu_container.firstElementChild);
+                }
             }
             else
             {
-                __GUI__.loadProfile(profile.id);
-                return true;
-            }
-        }
-    }, children);
-};
-
-Main.fillStbTypes = function()
-{
-    var blocks = document.getElementById('new-profile-blocks');
-    while(blocks.hasChildNodes())   blocks.removeChild(blocks.firstChild);
-
-    var stbTypes = JSON.parse(__GUI__.getStbTypes());
-
-    var createProfile = function()
-    {
-        window.open('profile_config.html#' + this.$stbType + ":");
-    };
-
-    for(var index = 0; index < stbTypes.length; index++)
-    {
-        var link = Main.createElement('a', {
-            'class':    'stb-type-block',
-            'href':       'javascript:void(0)',
-            '$id':        stbTypes[index].id,
-            '$stbType':   stbTypes[index].classId,
-            'onclick':    createProfile
-        }, [
-            {
-                tag:    'div',
-                attrs:  {
-                    'class': 'stb-type-title',
-                    innerHTML: stbTypes[index].name
+                for(; offset < 0; offset++)
+                {
+                    console.log('prependChild', menu_container.lastElementChild);
+                    menu_container.insertBefore(menu_container.lastElementChild, menu_container.firstElementChild);
                 }
             }
-        ]);
 
-        blocks.appendChild(link);
-    }
+            for(index=0; index < elements.length; index++)
+            {
+                var el = elements[index];
+                if(el.parentNode == menu_container)
+                {
+                    if(index < 3)
+                    {
+                        el.className = 'item';
+                        console.log('index' , index);
+                        if(index == 1)
+                        {
+                            current_menu_id = el.id;
+                            localStorage.setItem('current_menu_id', el.id);
+                            el.className += ' selected';
+                        }
 
-    return blocks;
-};
+                    }
+                    else
+                    {
+                        el.className = 'item hidden'
+                    }
+                }
+            }
 
-Main.removeFromFocusChain = function(className)
-{
-    var elements = document.getElementsByClassName(className);
-    for(var index=0; index < elements.length; index++)
-        elements[index].tabIndex = -1;
-};
-
-Main.addToFocusChain = function(className, start)
-{
-    start = start || 1;
-
-    var elements = document.getElementsByClassName(className);
-    for(var index=0; index < elements.length; index++)
-    {
-        elements[index].tabIndex = index + start;
-
-        if(index == 0)
-            elements[index].focus();
-    }
-
-};
-
-Main.showStbTypesList = function(show)
-{
-    var cont = document.getElementById('new-profile-container');
-    cont.style.display = show ? 'block': 'none';
-
-    if(show)
-    {
-        this.fillStbTypes();
-        this.removeFromFocusChain('profile-block');
-    }
-    else
-    {
-        this.addToFocusChain('profile-block');
-    }
-};
-
-Main.getSelectedProfile = function()
-{
-    var el = document.activeElement;
-    console.log('Active element: ' + el);
-    if(/profile-block/.test(el.className))
-    {
-        console.log(el);
-        return {
-            'uid': /^profile-(.*?)$/.exec(el.id)[1]
+            localStorage.setItem('current_menu', current_menu);
+            //var menu_offset = localStorage.getItem('menu_offset');
+            //localStorage.setItem('menu_offset', menu_offset + offset);
         }
-    }
-
-    return null;
-};
-
-Main.onKeyPress = function(/** KeyEvent */event)
-{
-    switch(event.keyCode)
-    {
-        case 11: //F1 / RED
-        {
-
-            var el = Main.getSelectedProfile();
-            if(el)
-                window.open('profile_config.html#:' + el.uid);
-
-            console.log(el);
-            break;
-        }
-        case 27: // ESC
-        {
-            Main.showStbTypesList(false);
-            break;
-        }
-    }
-};
+    };
+})();

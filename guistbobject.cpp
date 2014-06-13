@@ -80,13 +80,13 @@ QString GuiStbObject::getStbTypes()
 
 QString GuiStbObject::getProfileConfigOptions(const QString &profileId)
 {
-   STUB_WITH_PARAMS(profileId);
+   DEBUG() << profileId;
    QString result = "";
    Profile* profile = ProfileManager::instance()->findById(profileId);
 
    if(!profile)
    {
-       WARN("Profile not found!");
+       WARN() << "Profile not found!";
    }
    else
    {

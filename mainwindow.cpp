@@ -42,7 +42,7 @@ void MainWindow::setupGui()
 
     }
     else
-        ERROR("No mediplayer plugin found. Media will be disabled!");
+        ERROR() << "No mediplayer plugin found. Media will be disabled!";
 
     main->addLayout(stackedLayout);
     QWidget* centralWidget = new QWidget();
@@ -105,12 +105,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::initialize()
 {
-    DEBUG("initialize()");
+    DEBUG() << "initialize()";
 
     stb(dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole("stbapi")));
     if(!stb())
     {
-        ERROR("No STB plugin found! Portal won't work!");
+        ERROR() << "No STB plugin found! Portal won't work!";
     }
     datasource(dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole("datasource")));
     player(dynamic_cast<MediaPlayerPlugin*>(PluginManager::instance()->getByRole("mediaplayer")));
@@ -131,11 +131,6 @@ void MainWindow::initialize()
     ProfileManager::instance()->setActiveProfile(profile);
 
     //connect(Core::instance(), &Core::methodNotImplemented, this, &MainWindow::methodNotImplementedHandler);
-}
-
-void MainWindow::methodNotImplementedHandler(const QString& name)
-{
-    DEBUG("NOT IMPLEMENTED: " + name);
 }
 
 void MainWindow::resizeEvent(QResizeEvent * /* event */)

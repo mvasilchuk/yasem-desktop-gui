@@ -90,8 +90,6 @@ public slots:
     void setAppFullscreen(bool fullscreen);
 
     void addErrorToList(const QString &msg);
-
-    void methodNotImplementedHandler(const QString &name);
 };
 
 }

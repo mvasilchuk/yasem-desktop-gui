@@ -71,7 +71,7 @@ PLUGIN_ERROR_CODES DesktopGUI::initialize()
 {
     STUB();
 
-    DEBUG("========== Starting desktop GUI ==========");
+    DEBUG() << "========== Starting desktop GUI ==========";
 
     gui(this);
     browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole("browser")));
@@ -92,7 +92,7 @@ PLUGIN_ERROR_CODES DesktopGUI::initialize()
 
 PLUGIN_ERROR_CODES DesktopGUI::deinitialize()
 {
-    DEBUG("deinitialize()");
+    DEBUG() << "deinitialize()";
     return PLUGIN_ERROR_NO_ERROR;
 }
 

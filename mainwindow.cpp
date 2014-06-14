@@ -89,11 +89,13 @@ void MainWindow::setAppFullscreen(bool fullscreen)
         this->setWindowState(Qt::WindowFullScreen);
         statusBar->hide();
         menuBar->hide();
+
     } else {
         this->setWindowState(Qt::WindowNoState);
         statusBar->show();
         menuBar->show();
     }
+    browser()->fullscreen(fullscreen);
     resizeWebView();
 }
 
@@ -188,7 +190,6 @@ void MainWindow::moveVideo(int left, int top)
 void MainWindow::resizeWebView()
 {
     browser()->resize();
-
     player()->setViewport(browser()->rect(), browser()->scale(), player()->fixedRect());
 }
 

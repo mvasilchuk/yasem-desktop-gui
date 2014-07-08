@@ -9,73 +9,106 @@
 
 using namespace yasem;
 
+static const QString MENU_TYPE_STB_PROFILE = "stb-profile";
+static const QString MENU_TYPE_NEW_STB_PROFILE = "new-stb-profile";
+
+static const QString MENU_MAIN = "main-menu";
+static const QString MENU_NEW_PROFILE_CLASSES = "new-profile-classes";
+
 GuiStbObject::GuiStbObject(QObject *parent) :
     QObject(parent)
 {
     datasourcePlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole("datasource"));
 }
 
-QString GuiStbObject::getProfilesInfoJson(bool includeNewProfileItem = false)
+QJsonObject GuiStbObject::getProfilesMenuJson()
 {
     QList<Profile*> profiles = ProfileManager::instance()->getProfiles().toList();
-
-    QJsonArray result;
-
     qSort(profiles.begin(), profiles.end(), [](Profile *first, Profile *second) { return first->getName() < second->getName(); });
+
+    QJsonObject result;
+    QJsonObject items;
 
     foreach(Profile* profile, profiles)
     {
         if(profile->hasFlag(Profile::HIDDEN)) continue;
+
+        StbPlugin* plugin = profile->getProfilePlugin();
+        QString id = profile->getId();
+
         QJsonObject obj;
+        obj.insert("type", MENU_TYPE_STB_PROFILE);
+        obj.insert("image", plugin->getIcon());
+        obj.insert("title", profile->getName());
+        obj.insert("id", id);
+        obj.insert("url", profile->datasource()->get("profile", "portal", ""));
+        obj.insert("class", plugin->getProfileClassId());
 
-        obj.insert("image", profile->getImage());
-        obj.insert("name", profile->getName());
-        obj.insert("id", profile->getId());
-        obj.insert("url", profile->datasource()->get("profile", "portal", "-----"));
-        obj.insert("classId", profile->getProfilePlugin()->getProfileClassId());
-
-        result.append(obj);
+        items.insert(id, obj);
     }
 
-    if(includeNewProfileItem)
-    {
-        QJsonObject obj;
-        obj.insert("image", QString(""));
-        obj.insert("name", tr("New profile"));
-        obj.insert("id", -1);
-        obj.insert("url", QString());
-        obj.insert("classid", QString());
 
-        result.append(obj);
-    }
+    QJsonObject obj;
+    obj.insert("type", "");
+    obj.insert("image", QString("qrc:/desktop/gui/res/icons/add-stb-profile.png"));
+    obj.insert("title", tr("New profile"));
+    obj.insert("submenu", MENU_NEW_PROFILE_CLASSES);
 
-    return QString(QJsonDocument(result).toJson(QJsonDocument::Indented));
+    items.insert("new-profile-parent-menu", obj);
+
+    result.insert("items", items);
+    result.insert("count", items.count());
+
+    return result;
 }
 
-QString GuiStbObject::getStbTypes()
+QJsonObject GuiStbObject::getNewProfileMenuJson()
 {
     QMap<QString, StbProfilePlugin*> classes = ProfileManager::instance()->getRegisteredClasses();
 
-    QJsonArray result;
+    QJsonObject result;
+    QJsonObject items;
 
-    for(auto iter = classes.begin(); iter != classes.end(); iter++)
+    for(auto classId: classes.keys())
     {
-        foreach(Plugin::PluginRole role, iter.value()->roles)
+        foreach(Plugin::PluginRole role, classes.value(classId)->roles)
         {
             if(role.hasFlag(Plugin::HIDDEN) || role.name != "stbapi") break;
 
-            qDebug() << "GuiStbObject::getStbTypes" << iter.value()->className << role.name << role.flags;
+            qDebug() << "GuiStbObject::getStbTypes" << classes.value(classId)->className << role.name << role.flags;
+
+            StbProfilePlugin* plugin = classes.value(classId);
 
             //TODO: Should use role name, not Plugin id
             QJsonObject obj;
-            obj.insert("image", iter.value()->getImage());
-            obj.insert("classId", iter.key());
-            obj.insert("name", iter.key().toCaseFolded());
-            result.append(obj);
+            obj.insert("type", "new-stb-profile");
+            obj.insert("image", plugin->getIcon());
+            obj.insert("title", plugin->name);
+            obj.insert("class", classId);
+            items.insert(classId, obj);
         }
     }
 
-    return QString(QJsonDocument(result).toJson(QJsonDocument::Indented));
+    result.insert("items", items);
+    result.insert("count", items.count());
+
+    return result;
+}
+
+QString GuiStbObject::makeJsonMenu()
+{
+    QJsonObject menu;
+    QJsonObject items;
+
+    items.insert(MENU_MAIN, getProfilesMenuJson());
+    items.insert(MENU_NEW_PROFILE_CLASSES, getNewProfileMenuJson());
+
+    menu.insert("default", MENU_MAIN);
+    menu.insert("current", MENU_MAIN);
+    menu.insert("current_item_id", "");
+    menu.insert("items", items);
+
+    return QString(QJsonDocument(menu).toJson(QJsonDocument::Indented));
 }
 
 QString GuiStbObject::getProfileConfigOptions(const QString &profileId)
@@ -156,7 +189,7 @@ QString GuiStbObject::getTranslations()
     return QString(QJsonDocument(result).toJson(QJsonDocument::Indented));
 }
 
-void GuiStbObject::loadProfile(QString id)
+void GuiStbObject::loadProfile(const QString &id)
 {
     Profile* profile = ProfileManager::instance()->findById(id);
     Q_ASSERT(profile);
@@ -165,9 +198,25 @@ void GuiStbObject::loadProfile(QString id)
 
 bool GuiStbObject::saveProfile(const QString &id, const QString& jsonData)
 {
-    STUB();
-    qDebug() << id << jsonData;
+    DEBUG() << id << jsonData;
     Profile* profile = ProfileManager::instance()->findById(id);
     Q_ASSERT(profile);
     return profile->saveJsonConfig(jsonData);
+}
+
+bool GuiStbObject::removeProfile(const QString &id)
+{
+    Profile* profile = ProfileManager::instance()->findById(id);
+    return ProfileManager::instance()->removeProfile(profile);
+}
+
+QString GuiStbObject::getAppInfo()
+{
+    QJsonObject result;
+
+    result.insert("name", "yasem");
+    result.insert("version", "version 0.1");
+    result.insert("copyright", "Copyright 2014 by Maxim Vasilchuk");
+
+    return QString(QJsonDocument(result).toJson(QJsonDocument::Indented));
 }

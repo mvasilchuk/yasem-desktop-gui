@@ -3,6 +3,8 @@
 #include "desktopgui.h"
 #include "core.h"
 #include "profilemanager.h"
+#include "browserplugin.h"
+#include "stbprofile.h"
 
 
 #include <QHBoxLayout>
@@ -24,6 +26,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::setupGui()
 {
+    QSettings* settings = Core::instance()->settings();
+    settings->beginGroup("DesktopGui");
+    restoreGeometry(settings->value("geometry").toByteArray());
+    restoreState(settings->value("window_state").toByteArray());
+    settings->endGroup();
+
     Q_ASSERT(dynamic_cast<BrowserPlugin*>(browser()));
     Q_ASSERT(dynamic_cast<MediaPlayerPlugin*>(player()));
 
@@ -52,36 +60,70 @@ void MainWindow::setupGui()
     if(player())
         player()->raise();
 
-
     browser()->raise();
+
+    //centralWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
+    setMouseTracking(true);
+    browser()->setupMousePositionHandler(this, SLOT(onMousePositionChanged(int)));
+
     resizeWebView();
 }
 
 void MainWindow::setupMenu()
 {
+    //Setup menu
     menuBar = new QMenuBar(this);
     this->setMenuBar(menuBar);
 
-    mainMenu = new QMenu(tr("File"), this);
+    QMenu* fileMenu = new QMenu(tr("File"), this);
 
     QAction *exitAction = new QAction(tr("Exit"), this);
     connect(exitAction, &QAction::triggered, this, &MainWindow::close);
 
-    mainMenu->addAction(exitAction);
+    fileMenu->addAction(exitAction);
 
-    profilesMenu = new QMenu(tr("Profiles"), this);
+    QMenu* profilesMenu = new QMenu(tr("Profiles"), this);
 
-    menuBar->addMenu(mainMenu);
+    QAction *backToMainPage = new QAction(tr("Back to main page"), this);
+    connect(backToMainPage, &QAction::triggered, []() {
+        ProfileManager::instance()->backToMainPage();
+    });
 
+    profilesMenu->addAction(backToMainPage);
 
+    menuBar->addMenu(fileMenu);
+    menuBar->addMenu(profilesMenu);
+
+    //Setup status bar
     statusBar = new QStatusBar(this);
     setStatusBar(statusBar);
+
+    connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile) {
+        statusBar->showMessage(tr("Profile:").append(profile->getName()));
+    });
+
+
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *e) {
     QWidget::mouseDoubleClickEvent(e);
     setAppFullscreen(!isFullScreen());
 }
+
+void MainWindow::mousePressEvent(QMouseEvent *e)
+{
+    //qDebug() << "mousePressEvent" << e;
+    //browser()->passEvent(e);
+    // e->ignore();
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *e)
+{
+    //qDebug() << "mouseReleaseEvent" << e;
+    //browser()->passEvent(e);
+    //e->ignore();
+}
+
 
 void MainWindow::setAppFullscreen(bool fullscreen)
 {
@@ -96,12 +138,13 @@ void MainWindow::setAppFullscreen(bool fullscreen)
         menuBar->show();
     }
     browser()->fullscreen(fullscreen);
-    resizeWebView();
+    //resizeWebView();
 }
 
 MainWindow::~MainWindow()
 {
     //delete ui;
+
 }
 
 
@@ -124,7 +167,9 @@ void MainWindow::initialize()
     setupMenu();
 
     if(QCoreApplication::arguments().contains(arguments[FULLSCREEN_APP]))
+    {
         setAppFullscreen(true);
+    }
 
     QString id = "config";
 
@@ -152,6 +197,8 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
+
+
 bool MainWindow::event(QEvent *event)
 {
     if(event->type() == QEvent::KeyPress)
@@ -166,19 +213,81 @@ bool MainWindow::event(QEvent *event)
             }
         }
     }
+    else if(event->type() == QEvent::MouseButtonPress)
+    {
+        QMouseEvent* mEvent = (QMouseEvent*)event;
+        if(mEvent->button() == Qt::RightButton)
+        {
+             event->ignore();
+        }
+        //return false;
+    }
+    else if(event->type() == QEvent::MouseMove)
+    {
+        event->ignore();
+    }
 
     return QMainWindow::event(event);
+}
+
+void MainWindow::onMousePositionChanged(int position)
+{
+
+    if(isFullScreen())
+    {
+        bool top = (position & MOUSE_POSITION::TOP) == MOUSE_POSITION::TOP;
+        bool bottom = (position & MOUSE_POSITION::BOTTOM) == MOUSE_POSITION::BOTTOM;
+
+        qDebug() << position << top << bottom;
+
+        if(top && !menuBar->isVisible())
+        {
+           menuBar->setWindowFlags(Qt::WindowStaysOnTopHint);  // menu widget is child of mainwidget(central Widget of main window) and is not in layout
+           menuBar->raise();
+           menuBar->show();
+
+           resizeWebView();
+        }
+        else
+        {
+            if(!top && menuBar->isVisible())
+            {
+                menuBar->hide();
+                browser()->parent()->resize(this->size());
+                resizeWebView();
+            }
+        }
+
+        if(bottom && !statusBar->isVisible())
+        {
+            statusBar->raise();
+            statusBar->show();
+            resizeWebView();
+        }
+        else if(!bottom && statusBar->isVisible())
+        {
+            statusBar->hide();
+            browser()->parent()->resize(this->size());
+            resizeWebView();
+        }
+    }
 }
 
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    /*QSettings settings("MyCompany", "MyApp");
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("windowState", saveState());*/
+    QSettings* settings = Core::instance()->settings();
+    settings->beginGroup("DesktopGui");
+    settings->setValue("geometry", saveGeometry());
+    settings->setValue("window_state", saveState());
+    settings->endGroup();
+
     if(player())
         player()->mediaStop();
+
     QMainWindow::closeEvent(event);
+
+    qApp->quit();
 }
 
 void MainWindow::moveVideo(int left, int top)
@@ -189,6 +298,7 @@ void MainWindow::moveVideo(int left, int top)
 
 void MainWindow::resizeWebView()
 {
+    //browser()->parent()->resize(this->size());
     browser()->resize();
     player()->setViewport(browser()->rect(), browser()->scale(), player()->fixedRect());
 }

@@ -97,3 +97,9 @@ PLUGIN_ERROR_CODES DesktopGUI::deinitialize()
 }
 
 
+
+
+QString yasem::DesktopGUI::getIcon(const QSize &size =  QSize())
+{
+    return "";
+}

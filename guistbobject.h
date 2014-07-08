@@ -1,6 +1,7 @@
 #ifndef GUISTBOBJECT_H
 #define GUISTBOBJECT_H
 
+#include <QJsonObject>
 #include <QObject>
 
 namespace yasem
@@ -14,20 +15,26 @@ public:
     explicit GuiStbObject(QObject *parent = 0);
 
 
+
 signals:
 
 public slots:
-    QString getProfilesInfoJson(bool includeNewProfileItem);
-    QString getStbTypes();
+    QString makeJsonMenu();
+
     QString createProfile(const QString &classId, const QString &data);
     QString getTranslations();
     QString getProfileConfigOptions(const QString &profileId);
+    QJsonObject getProfilesMenuJson();
+    QJsonObject getNewProfileMenuJson();
 
-    void loadProfile(QString id);
+    void loadProfile(const QString &id);
 
     bool saveProfile(const QString &id, const QString &jsonData);
+    QString getAppInfo();
+    bool removeProfile(const QString &id);
 protected:
     DatasourcePlugin* datasourcePlugin;
+
 };
 
 }

@@ -55,15 +55,11 @@ public:
 protected:
     void changeEvent(QEvent *e);
     bool event(QEvent *event);
+
     DesktopGUI* desktopGui;
 
 private:
-
-
-
     QMenuBar *menuBar;
-    QMenu *mainMenu;
-    QMenu *profilesMenu;
     QStatusBar *statusBar;
 
     BrowserPlugin* browserPlugin;
@@ -86,10 +82,14 @@ public slots:
     void setupGui();
     void setupMenu();
     void mouseDoubleClickEvent(QMouseEvent *e);
+    void mousePressEvent(QMouseEvent* e);
+    void mouseReleaseEvent(QMouseEvent *e);
 
     void setAppFullscreen(bool fullscreen);
 
     void addErrorToList(const QString &msg);
+    void onMousePositionChanged(int position);
+
 };
 
 }

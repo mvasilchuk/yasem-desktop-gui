@@ -55,6 +55,10 @@ public slots:
     QString getProfileClassId();
     Profile *createProfile(const QString &id);
     void init();
+
+    // StbPlugin interface
+public:
+    QString getIcon(const QSize &size);
 };
 
 }

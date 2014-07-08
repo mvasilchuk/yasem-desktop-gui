@@ -1,151 +1,362 @@
+@page-width: 1920px;
+@page-height: 1080px;
+@page-background: lightcyan;
+
+@items-in-row-linear: 5;
+@items-in-column-linear: 1;
+
+@items-in-row-blocks: 5;
+@items-in-column-blocks: 3;
+
+@item-size: 800px / @items-in-column-blocks; //512px; //300px;
+@img-size: @item-size * 0.8;
+
+@middle-child: floor(@items-in-row-linear / 2) + 1;
+@item-margin: 2px;
+@item-border-size: 1px;
+@size-fix-for-big-resolutions: 2px;
+/* fix for big resolutions */
+@item-full-size: @item-size + ((@item-margin + @item-border-size + @size-fix-for-big-resolutions ) * 2);
 
 body {
-  background-color: lightcyan;
+    background-color: @page-background;
 }
 
-@item-size: 450px;
-@items-count: 3;
-@middle-child: floor(@items-count / 2) + 1;
-@item-margin: 5px;
-@item-border-size: 1px;
-@item-full-size: @item-size + ((@item-margin + @item-border-size) * 2);
+.hidden {
+    display: none;
+}
 
-.items {
+@inner-page-width: @item-full-size * @items-in-row-blocks;
+@inner-page-height: @item-full-size * @items-in-column-blocks;
 
-  border: 1px solid blue;
-  position: absolute;
+@shortcut-size: 80px;
+@shortcuts-bottom-offset: 30px;
 
-  width: @item-full-size * @items-count;
-  height: @item-full-size;
+.page {
+    background: @page-background;
 
-  left: 50%;
-  top: 50%;
+    position: absolute;
+    margin: auto;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: @shortcuts-bottom-offset + @shortcut-size;
 
-  margin-top: -(@item-size / 2);
-  margin-left: -(@item-size * @items-count / 2);
-
-  white-space: nowrap;
-  overflow: hidden;
-
-  display: flex;
-
-  @item-selected-border-color: lighten(blue, 5%);
-  @item-border-color: lighten(blue, 30%);
-
-  .item {
-    width: @item-size;
-    height: @item-size;
-    min-width: @item-size;
-    min-height: @item-size;
-    position: relative;
-
-    margin: @item-margin;
-
-    border-radius: 20px;
-    border: @item-border-size solid @item-border-color;
-    box-shadow: inset 0px 0px 20px 10px @item-border-color;
-
-    &.selected, &:hover {
-      border: 1px solid @item-selected-border-color;
-      box-shadow: inset 0px 0px 20px 10px @item-selected-border-color;
-      cursor: pointer;
-    }
+    padding: 40px;
 
     &.hidden {
-      display: none;
+        display: none;
     }
 
-    @img-size: @item-size * 0.6;
-
-    .image {
-      width: @img-size;
-      height: @img-size;
-      margin-left: (@item-size - @img-size) / 2;
-      margin-top: 20px;
-
-      img {
-        width: @img-size;
-        height: @img-size;
-        border: 1px solid blue;
-      }
+    &.top {
+        display: block;
+        z-index: 9999;
     }
-
-    @text-width: @item-size * 0.9;
-    @text-margin: (@item-size - @text-width) / 2;
-    .text-decor()
-    {
-      width: @text-width;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      margin-left: @text-margin;
-      margin-right: @text-margin;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .title {
-      .text-decor;
-    }
-
-    .type {
-      .text-decor;
-    }
-
-    .mark()
-    {
-      position: absolute;
-
-      border: 1px solid blue;
-    }
-
-    .parent_mark {
-      .mark;
-      width: 50px;
-      height: 50px;
-      bottom: 20px;
-      right: 20px;
-
-    }
-
-    .child_mark {
-      .mark;
-      width: 30px;
-      height: 30px;
-      top: 20px;
-      left: 20px;
-    }
-  }
 }
+
+#main-menu {
+
+    position: absolute;
+
+    width: @inner-page-width;
+    height: @inner-page-height;
+    overflow: auto;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    //display: flex; // Doesn't work in Qt WebKit
+
+    @item-selected-border-color: lighten(blue, 5%);
+    @item-border-color: lighten(blue, 30%);
+
+    .item {
+        width: @item-size;
+        height: @item-size;
+        min-width: @item-size;
+        min-height: @item-size;
+        position: relative;
+        display: inline-block;
+        float: left;
+
+        margin: @item-margin;
+
+        border-radius: 20px;
+        border: @item-border-size solid @item-border-color;
+        box-shadow: inset 0px 0px 20px 10px @item-border-color;
+
+        &.selected, &:hover {
+            border: 1px solid @item-selected-border-color;
+            box-shadow: inset 0px 0px 20px 10px @item-selected-border-color;
+            cursor: pointer;
+        }
+
+        &.hover {
+            border: 0px;
+        }
+
+        &.hidden {
+            display: none;
+        }
+
+        .image {
+            position: absolute;
+            width: @img-size;
+            height: @img-size;
+            margin: auto;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+
+            img {
+                width: @img-size;
+                height: @img-size;
+            }
+        }
+
+        @text-width: @item-size * 0.9;
+        @text-margin: (@item-size - @text-width) / 2;
+        .text-decor() {
+            width: @text-width;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin-left: @text-margin;
+            margin-right: @text-margin;
+            margin-top: -40px;
+            text-align: center;
+        }
+
+        .title {
+            .text-decor;
+            position: absolute;
+            //font-weight: bold;
+            font-size: 18pt;
+            text-shadow: -1px 0px blue;
+            white-space: pre-line;
+            bottom: 20%;
+
+        }
+
+        .type {
+            .text-decor;
+        }
+
+        .mark() {
+            position: absolute;
+
+            //border: 1px solid blue;
+        }
+
+        .parent_mark {
+            .mark;
+            width: 50px;
+            height: 50px;
+            bottom: 20px;
+            right: 20px;
+
+        }
+
+        .child_mark {
+            .mark;
+            width: 30px;
+            height: 30px;
+            top: 20px;
+            left: 20px;
+        }
+    }
+}
+
+.key {
+
+    vertical-align: middle;
+    font-size: @default-font-size;
+
+    display: inline-block;
+
+    width: @shortcut-size;
+    height: @shortcut-size / 2;
+
+    border-radius: @shortcut-size / 8;
+    border: 1px solid #b5d9ea;
+
+    text-align: center;
+    line-height: @shortcut-size / 2;
+
+    &.F1 {
+        background-color: red;
+    }
+    &.F2 {
+        background-color: green;
+    }
+    &.F3 {
+        background-color: yellow;
+    }
+    &.F4 {
+        background-color: blue;
+    }
+
+    &.arrow {
+        width: @shortcut-size / 2;
+
+        &.left:before {
+            content: "\2190";
+        }
+        &.top:before {
+            content: "\2191";
+        }
+        &.right:before {
+            content: "\2192";
+        }
+        &.bottom:before {
+            content: "\2193";
+        }
+    }
+}
+
+@default-font-size: 20pt;
+
+#shortcuts {
+    position: absolute;
+    bottom: @shortcuts-bottom-offset;
+    width: @inner-page-width;
+    margin: auto;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    height: @shortcut-size;
+
+    //border: 1px solid red;
+
+    .shortcut {
+        display: inline-block;
+        float: left;
+        width: 25%;
+
+        .title {
+            vertical-align: middle;
+            font-size: @default-font-size;
+        }
+
+        .title {
+            margin-left: 20px;
+
+            .title:before {
+                content: '&nbsp;-&nbsp;';
+            }
+        }
+
+    }
+}
+
+#profile-configuration {
+
+    #config-container {
+        @font-size: 28pt;
+
+        width: 100%;
+        //height: @page-height - @shortcuts-bottom-offset - @shortcut-size;
+        overflow-x: auto;
+        overflow-y: auto;
+
+        td, th {
+            min-width: 400px;
+        }
+
+        label, input, select {
+            font-size: @font-size;
+            padding: 8px;
+            height: 64px;
+            width: 100%;
+        }
+
+        input[type=checkbox] {
+            width: 64px;
+            height: 64px;
+        }
+
+        .comment {
+            td {
+                border: 1px solid #b5d9ea;
+
+                span.text {
+                    margin: 40px;
+                }
+            }
+        }
+
+    }
+
+}
+
+#help {
+    .title {
+        font-weight: bold;
+        text-align: center;
+        padding: 5px;
+
+        &.level1 {
+            font-size: 32pt;
+        }
+
+        &.level2 {
+            font-size: 28pt;
+        }
+
+        &.level3 {
+            font-size: 24pt;
+        }
+    }
+
+    td {
+        font-size: @default-font-size;
+        padding: 8px;
+        height: 32px;
+
+
+        &.description {
+
+        }
+    }
+}
+
+
 
 @side-offset: 50px;
 
-header {
-  .logo {
+
+.logo {
     position: absolute;
     top: @side-offset;
     left: @side-offset;
     width: 300px;
     height: 200px;
     display: block;
-  }
 }
 
+
 footer {
-  position: absolute;
-  bottom: @side-offset;
-  left: 0;
-  right: 0;
-  width: 100%;
-
-  .copyright {
     position: absolute;
-    text-align: left;
-    left: @side-offset;
-  }
+    bottom: @side-offset;
+    left: 0;
+    right: 0;
+    width: 100%;
 
-  .version {
-    position: absolute;
-    text-align: right;
-    right: @side-offset;
-  }
+    & > div {
+        position: absolute;
+    }
+
+    #app-copyright {
+        text-align: left;
+        left: @side-offset;
+    }
+
+    #app-version {
+        position: absolute;
+        text-align: right;
+        right: @side-offset;
+    }
 }

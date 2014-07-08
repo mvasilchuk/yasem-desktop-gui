@@ -40,9 +40,14 @@ void GuiConfigProfile::configureKeyMap()
     profilePlugin->browser()->registerKeyEvent(RC_KEY_RED, 11, 11);
 
     profilePlugin->browser()->registerKeyEvent(RC_KEY_EXIT, 27, 27); //ESC
+
+    profilePlugin->browser()->registerKeyEvent(RC_KEY_RED, 112, 112); //F1 / Red
+    profilePlugin->browser()->registerKeyEvent(RC_KEY_GREEN, 113, 113); //F2 / Green
+    profilePlugin->browser()->registerKeyEvent(RC_KEY_YELLOW, 114, 114); //F3 / Yellow
+    profilePlugin->browser()->registerKeyEvent(RC_KEY_BLUE, 115, 115); //F4 / Blue
 }
 
 QString GuiConfigProfile::portal()
 {
-    return "qrc:/desktop/gui/html/profiles.html";
+    return "qrc:/desktop/gui/res/html/main.html";
 }

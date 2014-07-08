@@ -15,7 +15,7 @@ CONFIG += c++11
 
 DEFINES += DESKTOPGUI_LIBRARY
 
-INCLUDEPATH += ../yasem-core
+INCLUDEPATH += ../../yasem-core
 
 SOURCES += desktopgui.cpp \
     mainwindow.cpp \
@@ -28,7 +28,8 @@ HEADERS += desktopgui.h\
     mainwindow.h \
     guiconfigprofile.h \
     guistbobject.h \
-    settingsdialog.h
+    settingsdialog.h  \
+    ../../yasem-core/profilemanager.h
 
 unix {
     target.path = /usr/lib
@@ -49,7 +50,7 @@ OTHER_FILES += \
 FORMS    += \
     settingsdialog.ui
 
-include(../common.pri)
+include(../../common.pri)
 DESTDIR = $$DEFAULT_PLUGIN_DIR
 
 RESOURCES += \

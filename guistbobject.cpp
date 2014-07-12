@@ -49,7 +49,7 @@ QJsonObject GuiStbObject::getProfilesMenuJson()
 
 
     QJsonObject obj;
-    obj.insert("type", "");
+    obj.insert("type", QString());
     obj.insert("image", QString("qrc:/desktop/gui/res/icons/add-stb-profile.png"));
     obj.insert("title", tr("New profile"));
     obj.insert("submenu", MENU_NEW_PROFILE_CLASSES);
@@ -81,7 +81,7 @@ QJsonObject GuiStbObject::getNewProfileMenuJson()
 
             //TODO: Should use role name, not Plugin id
             QJsonObject obj;
-            obj.insert("type", "new-stb-profile");
+            obj.insert("type", QString("new-stb-profile"));
             obj.insert("image", plugin->getIcon());
             obj.insert("title", plugin->name);
             obj.insert("class", classId);
@@ -105,7 +105,7 @@ QString GuiStbObject::makeJsonMenu()
 
     menu.insert("default", MENU_MAIN);
     menu.insert("current", MENU_MAIN);
-    menu.insert("current_item_id", "");
+    menu.insert("current_item_id", QString());
     menu.insert("items", items);
 
     return QString(QJsonDocument(menu).toJson(QJsonDocument::Indented));
@@ -214,9 +214,9 @@ QString GuiStbObject::getAppInfo()
 {
     QJsonObject result;
 
-    result.insert("name", "yasem");
-    result.insert("version", "version 0.1");
-    result.insert("copyright", "Copyright 2014 by Maxim Vasilchuk");
+    result.insert("name", QString("yasem"));
+    result.insert("version", QString("version 0.1"));
+    result.insert("copyright", QString("Copyright 2014 by Maxim Vasilchuk"));
 
     return QString(QJsonDocument(result).toJson(QJsonDocument::Indented));
 }

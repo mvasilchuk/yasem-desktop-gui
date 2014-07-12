@@ -138,7 +138,7 @@ void MainWindow::setAppFullscreen(bool fullscreen)
         menuBar->show();
     }
     browser()->fullscreen(fullscreen);
-    //resizeWebView();
+    resizeWebView();
 }
 
 MainWindow::~MainWindow()

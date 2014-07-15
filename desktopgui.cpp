@@ -63,8 +63,8 @@ Profile *DesktopGUI::createProfile(const QString &id)
 
 void DesktopGUI::init()
 {
-    api.clear();
-    api.insert("__GUI__", new GuiStbObject(this));
+    getApi().clear();
+    getApi().insert("__GUI__", new GuiStbObject(this));
 }
 
 PLUGIN_ERROR_CODES DesktopGUI::initialize()
@@ -74,7 +74,7 @@ PLUGIN_ERROR_CODES DesktopGUI::initialize()
     DEBUG() << "========== Starting desktop GUI ==========";
 
     gui(this);
-    browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole("browser")));
+    browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 
     ProfileManager::instance()->loadProfiles();
     configProfile = new GuiConfigProfile(dynamic_cast<StbPlugin*>(this), "config");
@@ -102,4 +102,18 @@ PLUGIN_ERROR_CODES DesktopGUI::deinitialize()
 QString yasem::DesktopGUI::getIcon(const QSize &size =  QSize())
 {
     return "";
+}
+
+
+void yasem::DesktopGUI::register_dependencies()
+{
+    add_dependency(ROLE_BROWSER);
+    add_dependency(ROLE_DATASOURCE);
+    add_dependency(ROLE_MEDIA);
+}
+
+void yasem::DesktopGUI::register_roles()
+{
+    register_role(ROLE_GUI);
+    register_role(ROLE_STB_API_SYSTEM);
 }

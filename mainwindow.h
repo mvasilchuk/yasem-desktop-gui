@@ -60,6 +60,7 @@ protected:
 
 private:
     QMenuBar *menuBar;
+    QToolBar* statusBarPanel;
     QStatusBar *statusBar;
 
     BrowserPlugin* browserPlugin;

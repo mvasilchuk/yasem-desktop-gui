@@ -18,7 +18,7 @@ static const QString MENU_NEW_PROFILE_CLASSES = "new-profile-classes";
 GuiStbObject::GuiStbObject(QObject *parent) :
     QObject(parent)
 {
-    datasourcePlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole("datasource"));
+    datasourcePlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(ROLE_DATASOURCE));
 }
 
 QJsonObject GuiStbObject::getProfilesMenuJson()
@@ -71,11 +71,11 @@ QJsonObject GuiStbObject::getNewProfileMenuJson()
 
     for(auto classId: classes.keys())
     {
-        foreach(Plugin::PluginRole role, classes.value(classId)->roles)
+        foreach(PluginRole role, classes.value(classId)->roles())
         {
-            if(role.hasFlag(Plugin::HIDDEN) || role.name != "stbapi") break;
+            if(role == ROLE_STB_API_SYSTEM) break;
 
-            qDebug() << "GuiStbObject::getStbTypes" << classes.value(classId)->className << role.name << role.flags;
+            DEBUG() << "GuiStbObject::getStbTypes" << classes.value(classId)->getClassName() << role;
 
             StbProfilePlugin* plugin = classes.value(classId);
 
@@ -83,7 +83,7 @@ QJsonObject GuiStbObject::getNewProfileMenuJson()
             QJsonObject obj;
             obj.insert("type", QString("new-stb-profile"));
             obj.insert("image", plugin->getIcon());
-            obj.insert("title", plugin->name);
+            obj.insert("title", plugin->getName());
             obj.insert("class", classId);
             items.insert(classId, obj);
         }

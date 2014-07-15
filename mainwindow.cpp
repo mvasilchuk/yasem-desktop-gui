@@ -11,6 +11,7 @@
 #include <QStackedLayout>
 #include <QHash>
 #include <QMargins>
+#include <QToolBar>
 
 #include <QEvent>
 #include <QKeyEvent>
@@ -20,18 +21,16 @@ using namespace yasem;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-
-}
-
-
-void MainWindow::setupGui()
-{
     QSettings* settings = Core::instance()->settings();
     settings->beginGroup("DesktopGui");
     restoreGeometry(settings->value("geometry").toByteArray());
     restoreState(settings->value("window_state").toByteArray());
     settings->endGroup();
+}
 
+
+void MainWindow::setupGui()
+{
     Q_ASSERT(dynamic_cast<BrowserPlugin*>(browser()));
     Q_ASSERT(dynamic_cast<MediaPlayerPlugin*>(player()));
 
@@ -94,9 +93,17 @@ void MainWindow::setupMenu()
     menuBar->addMenu(fileMenu);
     menuBar->addMenu(profilesMenu);
 
+
+
     //Setup status bar
     statusBar = new QStatusBar(this);
-    setStatusBar(statusBar);
+    //setStatusBar(statusBar);
+
+    statusBarPanel = new QToolBar(this);
+    statusBarPanel->setObjectName("statusBarPanel");
+    statusBarPanel->addWidget(statusBar);
+    statusBarPanel->setMovable(false);
+    this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
 
     connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile) {
         statusBar->showMessage(tr("Profile:").append(profile->getName()));
@@ -129,16 +136,16 @@ void MainWindow::setAppFullscreen(bool fullscreen)
 {
     if(fullscreen) {
         this->setWindowState(Qt::WindowFullScreen);
-        statusBar->hide();
+        statusBarPanel->hide();
         menuBar->hide();
 
     } else {
         this->setWindowState(Qt::WindowNoState);
-        statusBar->show();
+        statusBarPanel->show();
         menuBar->show();
     }
     browser()->fullscreen(fullscreen);
-    resizeWebView();
+    //resizeWebView();
 }
 
 MainWindow::~MainWindow()
@@ -152,16 +159,16 @@ void MainWindow::initialize()
 {
     DEBUG() << "initialize()";
 
-    stb(dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole("stbapi")));
+    stb(dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole(ROLE_STB_API)));
     if(!stb())
     {
         ERROR() << "No STB plugin found! Portal won't work!";
     }
-    datasource(dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole("datasource")));
-    player(dynamic_cast<MediaPlayerPlugin*>(PluginManager::instance()->getByRole("mediaplayer")));
-    gui(dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole("gui")));
+    datasource(dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(ROLE_DATASOURCE)));
+    player(dynamic_cast<MediaPlayerPlugin*>(PluginManager::instance()->getByRole(ROLE_MEDIA)));
+    gui(dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI)));
     Q_ASSERT(gui() != NULL);
-    browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole("browser")));
+    browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 
     setupGui();
     setupMenu();
@@ -246,7 +253,7 @@ void MainWindow::onMousePositionChanged(int position)
            menuBar->raise();
            menuBar->show();
 
-           resizeWebView();
+           //resizeWebView();
         }
         else
         {
@@ -260,13 +267,19 @@ void MainWindow::onMousePositionChanged(int position)
 
         if(bottom && !statusBar->isVisible())
         {
-            statusBar->raise();
-            statusBar->show();
-            resizeWebView();
+            this->removeToolBar(statusBarPanel);
+            int stHeight = statusBarPanel->height();
+            statusBarPanel->setGeometry(0, this->height() - stHeight, this->width(), stHeight);
+            statusBarPanel->setStyleSheet("background:rgba(128, 128, 128, 0.2); color: black;");
+            statusBarPanel->raise();
+            statusBarPanel->show();
+            //resizeWebView();
         }
         else if(!bottom && statusBar->isVisible())
         {
-            statusBar->hide();
+            statusBarPanel->setStyleSheet("");
+            this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
+            statusBarPanel->hide();
             browser()->parent()->resize(this->size());
             resizeWebView();
         }
@@ -276,11 +289,14 @@ void MainWindow::onMousePositionChanged(int position)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    DEBUG() << "CLOSE EVENT!!!!";
+
     QSettings* settings = Core::instance()->settings();
     settings->beginGroup("DesktopGui");
     settings->setValue("geometry", saveGeometry());
     settings->setValue("window_state", saveState());
     settings->endGroup();
+    settings->sync();
 
     if(player())
         player()->mediaStop();

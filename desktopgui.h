@@ -13,7 +13,7 @@ namespace yasem
 
 class MainWindow;
 
-class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public virtual Plugin, public GuiPlugin, public StbPlugin
+class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public GuiPlugin, public StbPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "com.mvas.yasem.DesktopGuiPlugin/1.0" FILE "metadata.json")
@@ -59,6 +59,11 @@ public slots:
     // StbPlugin interface
 public:
     QString getIcon(const QSize &size);
+
+    // Plugin interface
+public:
+    void register_dependencies();
+    void register_roles();
 };
 
 }

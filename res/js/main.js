@@ -50,7 +50,7 @@
     };
 
     _createNode = function(tag, jsonData, children) {
-      var child, data_value, id, item, node, option, _i, _j, _len, _len1;
+      var child, data_value, id, item, node, text, value, _i, _len;
       node = document.createElement(tag);
       for (id in jsonData) {
         data_value = jsonData[id];
@@ -69,12 +69,15 @@
             node.innerHTML = data_value;
             break;
           case 'options':
-            for (_i = 0, _len = data_value.length; _i < _len; _i++) {
-              option = data_value[_i];
+            for (value in data_value) {
+              text = data_value[value];
               item = _createNode('option', {
-                value: option.value,
-                text: option.title
+                value: value,
+                text: text
               });
+              if (value === jsonData.value) {
+                item.selected = 'selected';
+              }
               node.appendChild(item);
             }
             break;
@@ -83,8 +86,8 @@
         }
       }
       children = children || [];
-      for (_j = 0, _len1 = children.length; _j < _len1; _j++) {
-        child = children[_j];
+      for (_i = 0, _len = children.length; _i < _len; _i++) {
+        child = children[_i];
         node.appendChild(child);
       }
       return node;
@@ -484,15 +487,17 @@
             elemTag = 'input';
             break;
           case CONFIG_ITEM_TYPES.BOOL:
-            elemTag = 'input';
-            inputType = 'checkbox';
+            elemTag = 'select';
+            options = {
+              'true': 'TRUE',
+              'false': 'FALSE'
+            };
             break;
           default:
             console.log('options' + typeof config_item.options);
-            if (typeof config_item.options !== 'undefined' && Array.isArray(config_item.options)) {
+            if (typeof config_item.options !== 'undefined' && config_item.options) {
               elemTag = 'select';
               options = config_item.options;
-              console.log('AAAA:' + options.length);
             } else {
               elemTag = 'input';
             }

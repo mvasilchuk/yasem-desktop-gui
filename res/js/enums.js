@@ -20,10 +20,10 @@
   };
 
   window.CONFIG_ITEM_TYPES = {
-    STRING: 1,
-    BOOL: 2,
-    INT: 3,
-    VARIANT: 4
+    STRING: "string",
+    BOOL: "bool",
+    INT: "int",
+    VARIANT: "variant"
   };
 
   window.CONFIG_MENU_VISUAL_TYPE = {

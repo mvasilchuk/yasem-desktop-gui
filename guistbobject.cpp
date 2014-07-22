@@ -73,7 +73,7 @@ QJsonObject GuiStbObject::getNewProfileMenuJson()
     {
         foreach(PluginRole role, classes.value(classId)->roles())
         {
-            if(role == ROLE_STB_API_SYSTEM) break;
+            if(role != ROLE_STB_API) break;
 
             DEBUG() << "GuiStbObject::getStbTypes" << classes.value(classId)->getClassName() << role;
 
@@ -123,39 +123,40 @@ QString GuiStbObject::getProfileConfigOptions(const QString &profileId)
    }
    else
    {
+
+
        QJsonArray arr;
 
-       auto options = profile->getProfileConfig().options();
-       for(ProfileConfig::Option option: options)
+       const ProfileConfiguration &config = profile->config();
+
+       for(ProfileConfigGroup group: config.groups)
        {
-            QJsonObject obj;
+           DEBUG() << "GROUP:" << group.title;
 
-            obj.insert("tag", option.tag);
-            obj.insert("name", option.name);
-            obj.insert("title", option.title);
-            obj.insert("comment", option.comment);
+           for(int index = 0; index < group.options.size(); index++)
+           {
+               const ConfigOption &option = group.options.at(index);
 
+               QJsonObject obj;
 
+               obj.insert("tag", option.tag);
+               obj.insert("name", option.name);
+               obj.insert("title", option.title);
+               obj.insert("comment", option.comment);
+               obj.insert("value", profile->datasource()->get(option.tag, option.name, option.defaultValue));
+               obj.insert("type", option.type);
 
-            switch(option.type)
-            {
-                case ProfileConfig::STRING:
-                    obj.insert("value", profile->datasource()->get(option.tag, option.name, option.strValue));
-                    break;
-                case ProfileConfig::INT:
-                    obj.insert("value", profile->datasource()->get(option.tag, option.name, option.intValue));
-                    break;
-                case ProfileConfig::BOOL:
-                    obj.insert("value", profile->datasource()->get(option.tag, option.name, QVariant(option.boolValue).toString()));
-                    break;
-                default:
-                    obj.insert("value", option.varValue.toString());
-                    break;
-            }
+               QJsonObject options;
+               for(const QString &key: option.options.keys())
+               {
+                   options.insert(key, option.options.value(key));
+               }
 
-            obj.insert("type", option.type);
+               obj.insert("options", options);
 
-            arr.append(obj);
+               arr.append(obj);
+           }
+
        }
 
        result = QString(QJsonDocument(arr).toJson(QJsonDocument::Indented));

@@ -56,8 +56,10 @@ class Main
                     node.innerHTML = data_value;
 
                 when 'options'
-                    for option in data_value
-                        item = _createNode('option', { value: option.value, text: option.title});
+                    for value, text of data_value
+                        item = _createNode('option', { value: value, text: text});
+                        if value == jsonData.value
+                            item.selected = 'selected'
                         node.appendChild(item);
 
                 else
@@ -396,14 +398,16 @@ class Main
                 when CONFIG_ITEM_TYPES.STRING, CONFIG_ITEM_TYPES.INT
                     elemTag = 'input'
                 when CONFIG_ITEM_TYPES.BOOL
-                    elemTag = 'input';
-                    inputType = 'checkbox'
+                    elemTag = 'select';
+                    options = {
+                        'true': 'TRUE',
+                        'false': 'FALSE'
+                    }
                 else
                     console.log('options' + typeof config_item.options)
-                    if(typeof config_item.options != 'undefined' && Array.isArray(config_item.options))
+                    if(typeof config_item.options != 'undefined' && config_item.options)
                         elemTag = 'select'
                         options = config_item.options;
-                        console.log('AAAA:' + options.length)
                     else
                         elemTag = 'input'
                     break;

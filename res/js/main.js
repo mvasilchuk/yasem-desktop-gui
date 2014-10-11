@@ -276,7 +276,7 @@
             __GUI__.loadProfile(menu.id);
           }
           if (menu.type === MENU_TYPE.NEW_PROFILE) {
-            this.create_new_profile(menu["class"]);
+            this.create_new_profile(menu["class"], menu.submodel, "{}");
           } else if (typeof menu.submenu !== 'undefined') {
             submenu = menu.submenu;
             menu_stack.push(Menu.current);
@@ -301,7 +301,7 @@
           console.log("F3");
           break;
         case KEY_CODE.KEY_CODE_F4:
-          if (confirm('Remove profile?')) {
+          if (confirm('Remove profile ' + menu.title + '?')) {
             __GUI__.removeProfile(Menu.current_item_id);
             document.location.reload();
           }
@@ -429,9 +429,9 @@
       return this.move_menu_blocks(x + menu_size.width * y);
     };
 
-    Main.prototype.create_new_profile = function(class_id) {
+    Main.prototype.create_new_profile = function(class_id, submodel, data) {
       var id;
-      id = __GUI__.createProfile(class_id, null);
+      id = __GUI__.createProfile(class_id, submodel, data);
       return this.load_profile_config(id);
     };
 
@@ -465,11 +465,13 @@
      */
 
     Main.prototype.load_profile_config = function(profile_id, class_id) {
-      var config, config_item, config_table, edit_tag_id, elemTag, index, inputType, new_node_options, options, tr, _comment, _i, _len, _results;
+      var config, config_data, config_item, config_table, edit_tag_id, elemTag, index, inputType, new_node_options, options, submodel_key, tr, _comment, _i, _len, _results;
       this.open_page(PAGE_IDENT.PROFILE_CONFIG);
       this.profile_id = profile_id;
       config = null;
-      config = JSON.parse(__GUI__.getProfileConfigOptions(this.profile_id));
+      config_data = JSON.parse(__GUI__.getProfileConfigOptions(this.profile_id));
+      submodel_key = config_data['submodel_key'];
+      config = config_data.options;
       config_table = document.getElementById('config-container');
       while (config_table.hasChildNodes()) {
         config_table.removeChild(config_table.firstChild);

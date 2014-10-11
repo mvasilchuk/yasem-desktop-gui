@@ -91,8 +91,8 @@ if !__GUI__?
 
         loadProfile: (id) ->
             console.log('Loading profile ' + id)
-        createProfile: (classId, data) ->
-            console.log('Creating profile ' + classId + " with data " + JSON.stringify(data))
+        createProfile: (classId, submodel, data) ->
+            console.log('Creating profile ' + classId + "->" + submodel + " with data " + JSON.stringify(data))
             return "random-profile-id"
         saveProfile: (id, data) ->
             console.log('Saving profile ' + id + " with data " + JSON.stringify(data))

@@ -227,7 +227,7 @@ class Main
                     __GUI__.loadProfile(menu.id);
                 if menu.type == MENU_TYPE.NEW_PROFILE
                     #__GUI__.createProfile(menu.id, menu.data);
-                    @create_new_profile(menu.class);
+                    @create_new_profile(menu.class, menu.submodel, "{}");
 
                 else if typeof menu.submenu != 'undefined'
                     submenu = menu.submenu
@@ -250,7 +250,7 @@ class Main
             when KEY_CODE.KEY_CODE_F3
                 console.log("F3")
             when KEY_CODE.KEY_CODE_F4
-                if confirm('Remove profile?')
+                if confirm('Remove profile '+menu.title+'?')
                     __GUI__.removeProfile(Menu.current_item_id);
                     document.location.reload()
             else
@@ -346,8 +346,8 @@ class Main
 
         @move_menu_blocks(x + menu_size.width * y)
 
-    create_new_profile: (class_id) ->
-        id = __GUI__.createProfile(class_id, null)
+    create_new_profile: (class_id, submodel, data) ->
+        id = __GUI__.createProfile(class_id, submodel, data)
         @load_profile_config(id)
 
     save_profile_config: () ->
@@ -378,7 +378,10 @@ class Main
         @profile_id = profile_id
         config = null;
 
-        config = JSON.parse(__GUI__.getProfileConfigOptions(@profile_id));
+        config_data = JSON.parse(__GUI__.getProfileConfigOptions(@profile_id));
+
+        submodel_key = config_data['submodel_key'];
+        config = config_data.options;
 
         config_table = document.getElementById('config-container')
         while(config_table.hasChildNodes())
@@ -390,6 +393,8 @@ class Main
             elemTag = null
             inputType = null
             options = null;
+
+            #if(config_item.tag == submodel_key)
 
 
             #console.log(config_item  + typeof config_item.value);

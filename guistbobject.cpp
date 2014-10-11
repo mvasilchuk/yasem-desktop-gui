@@ -64,28 +64,39 @@ QJsonObject GuiStbObject::getProfilesMenuJson()
 
 QJsonObject GuiStbObject::getNewProfileMenuJson()
 {
-    QMap<QString, StbProfilePlugin*> classes = ProfileManager::instance()->getRegisteredClasses();
+    QMap<QString, StbPlugin*> classes = ProfileManager::instance()->getRegisteredClasses();
 
     QJsonObject result;
     QJsonObject items;
 
-    for(auto classId: classes.keys())
+    for(const QString &classId: classes.keys())
     {
         foreach(PluginRole role, classes.value(classId)->roles())
         {
             if(role != ROLE_STB_API) break;
 
-            DEBUG() << "GuiStbObject::getStbTypes" << classes.value(classId)->getClassName() << role;
+            StbPlugin* plugin = classes.value(classId);
 
-            StbProfilePlugin* plugin = classes.value(classId);
+            DEBUG() << "STB API found:" << plugin->getClassName() ;
+
+            QList<StbSubmodel> submodels = plugin->getSubmodels();
+
+            for(const StbSubmodel &submodel: submodels)
+            {
+                QJsonObject obj;
+                obj.insert("type", QString("new-stb-profile"));
+                obj.insert("image", submodel.logo);
+                obj.insert("title", submodel.name);
+                obj.insert("class", classId);
+                obj.insert(CONFIG_SUBMODEL, submodel.id);
+
+                QString id = classId;
+                id.append(":").append(submodel.id);
+                items.insert(id, obj);
+            }
 
             //TODO: Should use role name, not Plugin id
-            QJsonObject obj;
-            obj.insert("type", QString("new-stb-profile"));
-            obj.insert("image", plugin->getIcon());
-            obj.insert("title", plugin->getName());
-            obj.insert("class", classId);
-            items.insert(classId, obj);
+
         }
     }
 
@@ -123,8 +134,7 @@ QString GuiStbObject::getProfileConfigOptions(const QString &profileId)
    }
    else
    {
-
-
+       QJsonObject result_object;
        QJsonArray arr;
 
        const ProfileConfiguration &config = profile->config();
@@ -156,22 +166,26 @@ QString GuiStbObject::getProfileConfigOptions(const QString &profileId)
 
                arr.append(obj);
            }
-
        }
 
-       result = QString(QJsonDocument(arr).toJson(QJsonDocument::Indented));
+       result_object.insert("submodel", profile->getSubmodel().id);
+       result_object.insert("submodel_key", QString("%1/%2").arg(profile->getProfilePlugin()->getSubmodelDatasourceGroup(), profile->getProfilePlugin()->getSubmodelDatasourceField()));
+       result_object.insert("options", arr);
+
+       result = QString(QJsonDocument(result_object).toJson(QJsonDocument::Indented));
        qDebug() << result;
    }
    return result;
 
 }
 
-QString GuiStbObject::createProfile(const QString &classId, const QString &data = "")
+QString GuiStbObject::createProfile(const QString &classId, const QString &submodel, const QString &data = "{}")
 {
     STUB();
-    qDebug() << classId << "data" << data;
+    qDebug() << classId << submodel << "data" << data;
 
-    Profile* profile = ProfileManager::instance()->createProfile(classId);
+    Profile* profile = ProfileManager::instance()->createProfile(classId, submodel);
+
     Q_ASSERT(profile);
     ProfileManager::instance()->addProfile(profile);
     qDebug() << profile;

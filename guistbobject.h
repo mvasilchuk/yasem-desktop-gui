@@ -21,7 +21,7 @@ signals:
 public slots:
     QString makeJsonMenu();
 
-    QString createProfile(const QString &classId, const QString &data);
+    QString createProfile(const QString &classId, const QString &submodel, const QString &data);
     QString getTranslations();
     QString getProfileConfigOptions(const QString &profileId);
     QJsonObject getProfilesMenuJson();

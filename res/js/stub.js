@@ -100,8 +100,8 @@
         return console.log('Loading profile ' + id);
       };
 
-      __GUI__.prototype.createProfile = function(classId, data) {
-        console.log('Creating profile ' + classId + " with data " + JSON.stringify(data));
+      __GUI__.prototype.createProfile = function(classId, submodel, data) {
+        console.log('Creating profile ' + classId + "->" + submodel + " with data " + JSON.stringify(data));
         return "random-profile-id";
       };
 

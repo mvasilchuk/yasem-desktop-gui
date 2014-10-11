@@ -245,8 +245,6 @@ void MainWindow::onMousePositionChanged(int position)
         bool top = (position & MOUSE_POSITION::TOP) == MOUSE_POSITION::TOP;
         bool bottom = (position & MOUSE_POSITION::BOTTOM) == MOUSE_POSITION::BOTTOM;
 
-        qDebug() << position << top << bottom;
-
         if(top && !menuBar->isVisible())
         {
            menuBar->setWindowFlags(Qt::WindowStaysOnTopHint);  // menu widget is child of mainwidget(central Widget of main window) and is not in layout

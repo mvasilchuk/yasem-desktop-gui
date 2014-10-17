@@ -36,6 +36,11 @@ bool DesktopGUI::getFullscreen()
     return this->mainWindow->isFullScreen();
 }
 
+void DesktopGUI::repaintGui()
+{
+    this->mainWindow->resizeWebView();
+}
+
 bool DesktopGUI::addWebObject(const QString &name, QWidget *widget, const QString &mimeType, const QString &classid, const QString &description)
 {
     return true;
@@ -99,20 +104,20 @@ PLUGIN_ERROR_CODES DesktopGUI::deinitialize()
 
 
 
-QString yasem::DesktopGUI::getIcon(const QSize &size =  QSize())
+QString DesktopGUI::getIcon(const QSize &size =  QSize())
 {
     return "";
 }
 
 
-void yasem::DesktopGUI::register_dependencies()
+void DesktopGUI::register_dependencies()
 {
     add_dependency(ROLE_BROWSER);
     add_dependency(ROLE_DATASOURCE);
     add_dependency(ROLE_MEDIA);
 }
 
-void yasem::DesktopGUI::register_roles()
+void DesktopGUI::register_roles()
 {
     register_role(ROLE_GUI);
     register_role(ROLE_STB_API_SYSTEM);

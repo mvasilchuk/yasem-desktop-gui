@@ -309,7 +309,6 @@ void MainWindow::moveVideo(int left, int top)
     player()->move(left, top);
 }
 
-
 void MainWindow::resizeWebView()
 {
     //browser()->parent()->resize(this->size());

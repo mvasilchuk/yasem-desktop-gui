@@ -13,7 +13,7 @@ namespace yasem
 
 class MainWindow;
 
-class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public GuiPlugin, public StbPlugin
+class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public GuiPlugin, public virtual StbPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "com.mvas.yasem.DesktopGuiPlugin/1.0" FILE "metadata.json")
@@ -45,6 +45,8 @@ public:
 
     void setFullscreen(bool fullscreen);
     bool getFullscreen();
+
+    virtual void repaintGui();
 
     // StbPlugin interface
 public slots:

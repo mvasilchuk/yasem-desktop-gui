@@ -6,18 +6,17 @@
 #include "mediaplayerplugin.h"
 #include "datasourceplugin.h"
 #include "stbplugin.h"
-#include "guiconfigprofile.h"
 
 namespace yasem
 {
 
 class MainWindow;
 
-class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public GuiPlugin, public virtual StbPlugin
+class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public GuiPlugin, public Plugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "com.mvas.yasem.DesktopGuiPlugin/1.0" FILE "metadata.json")
-    Q_INTERFACES(yasem::Plugin yasem::GuiPlugin yasem::StbPlugin)
+    Q_INTERFACES(yasem::Plugin yasem::GuiPlugin )
 
     Q_CLASSINFO("author", "Maxim Vasilchuk")
     Q_CLASSINFO("description", "Desktop GUI for YASEM")
@@ -48,19 +47,6 @@ public:
 
     virtual void repaintGui();
 
-    // StbPlugin interface
-public slots:
-    bool addWebObject(const QString &name, QWidget *widget, const QString &mimeType, const QString &classid, const QString &description);
-    QUrl handleUrl(QUrl &url);
-    void applyFixes();
-
-    QString getProfileClassId();
-    Profile *createProfile(const QString &id);
-    void init();
-
-    // StbPlugin interface
-public:
-    QString getIcon(const QSize &size);
 
     // Plugin interface
 public:

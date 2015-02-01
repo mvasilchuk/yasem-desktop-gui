@@ -2,8 +2,6 @@
 #include "pluginmanager.h"
 #include "mainwindow.h"
 #include "profilemanager.h"
-#include "guistbobject.h"
-
 
 #include <QApplication>
 
@@ -41,51 +39,15 @@ void DesktopGUI::repaintGui()
     this->mainWindow->resizeWebView();
 }
 
-bool DesktopGUI::addWebObject(const QString &name, QWidget *widget, const QString &mimeType, const QString &classid, const QString &description)
-{
-    return true;
-}
-
-QUrl DesktopGUI::handleUrl(QUrl &url)
-{
-    return url;
-}
-
-void DesktopGUI::applyFixes()
-{
-
-}
-
-QString DesktopGUI::getProfileClassId()
-{
-    return "config";
-}
-
-Profile *DesktopGUI::createProfile(const QString &id)
-{
-    return new GuiConfigProfile(this, id);
-}
-
-void DesktopGUI::init()
-{
-    getApi().clear();
-    getApi().insert("__GUI__", new GuiStbObject(this));
-}
-
 PLUGIN_ERROR_CODES DesktopGUI::initialize()
 {
     STUB();
 
     DEBUG() << "========== Starting desktop GUI ==========";
 
-    gui(this);
-    browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
+
 
     ProfileManager::instance()->loadProfiles();
-    configProfile = new GuiConfigProfile(dynamic_cast<StbPlugin*>(this), "config");
-    configProfile->addFlag(Profile::HIDDEN); // Don't show in STB list
-    Q_ASSERT(configProfile);
-    ProfileManager::instance()->addProfile(configProfile);
 
     mainWindow = new MainWindow();
     mainWindow->initialize();
@@ -101,18 +63,11 @@ PLUGIN_ERROR_CODES DesktopGUI::deinitialize()
     return PLUGIN_ERROR_NO_ERROR;
 }
 
-
-
-
-QString DesktopGUI::getIcon(const QSize &size =  QSize())
-{
-    return "";
-}
-
-
 void DesktopGUI::register_dependencies()
 {
+    add_dependency(ROLE_WEB_SERVER);
     add_dependency(ROLE_BROWSER);
+    add_dependency(ROLE_WEB_GUI);
     add_dependency(ROLE_DATASOURCE);
     add_dependency(ROLE_MEDIA);
 }

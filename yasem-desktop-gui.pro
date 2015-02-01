@@ -19,15 +19,11 @@ INCLUDEPATH += ../../yasem-core
 
 SOURCES += desktopgui.cpp \
     mainwindow.cpp \
-    guiconfigprofile.cpp \
-    guistbobject.cpp \
     settingsdialog.cpp
 
 HEADERS += desktopgui.h\
     desktopgui_global.h \
     mainwindow.h \
-    guiconfigprofile.h \
-    guistbobject.h \
     settingsdialog.h  \
     ../../yasem-core/profilemanager.h
 

@@ -167,7 +167,6 @@ void MainWindow::initialize()
     datasource(dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(ROLE_DATASOURCE)));
     player(dynamic_cast<MediaPlayerPlugin*>(PluginManager::instance()->getByRole(ROLE_MEDIA)));
     gui(dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI)));
-    Q_ASSERT(gui() != NULL);
     browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 
     setupGui();
@@ -178,9 +177,11 @@ void MainWindow::initialize()
         setAppFullscreen(true);
     }
 
-    QString id = "config";
+    QString configProfileSubmoduleId = "web-gui-config";
+    StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole(ROLE_WEB_GUI));
+    Q_ASSERT(stbPlugin);
 
-    Profile* profile = ProfileManager::instance()->findById(id);
+    Profile* profile = ProfileManager::instance()->findById(configProfileSubmoduleId);
     Q_ASSERT(profile);
     ProfileManager::instance()->setActiveProfile(profile);
 

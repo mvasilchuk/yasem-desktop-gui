@@ -1,17 +1,1 @@
-<RCC>
-    <qresource prefix="/desktop/gui">
-        <file>res/css/main.css</file>
-        <file>res/css/main.less</file>
-        <file>res/css/profiles.css</file>
-        <file>res/html/main.html</file>
-        <file>res/html/profile_config.html</file>
-        <file>res/html/profiles.html</file>
-        <file>res/js/main.js</file>
-        <file>res/js/profile_config.js</file>
-        <file>res/js/profiles.js</file>
-        <file>res/js/stub.js</file>
-        <file>res/img/white-highlight.png</file>
-        <file>res/icons/add-stb-profile.png</file>
-        <file>res/js/enums.js</file>
-    </qresource>
-</RCC>
+<RCC/>

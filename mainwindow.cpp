@@ -91,9 +91,58 @@ void MainWindow::setupMenu()
     profilesMenu->addAction(backToMainPage);
 
     menuBar->addMenu(fileMenu);
+
+
+    QMenu* aspectRatioMenu = new QMenu(tr("Aspect ratio"));
+
+    QAction* aspectRatioAuto = new QAction(tr("Auto"), aspectRatioMenu);
+    connect(aspectRatioAuto, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_AUTO); });
+
+    QAction* aspectRatio1_1 = new QAction(tr("1:1"), aspectRatioMenu);
+    connect(aspectRatio1_1, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_1_1); });
+
+    QAction* aspectRatio5_4 = new QAction(tr("5:4"), aspectRatioMenu);
+    connect(aspectRatio5_4, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_5_4); });
+
+    QAction* aspectRatio4_3 = new QAction(tr("4:3"), aspectRatioMenu);
+    connect(aspectRatio4_3, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_4_3); });
+
+    QAction* aspectRatio11_8 = new QAction(tr("11_8"), aspectRatioMenu);
+    connect(aspectRatio11_8, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_11_8); });
+
+    QAction* aspectRatio14_10 = new QAction(tr("14:10"), aspectRatioMenu);
+    connect(aspectRatio14_10, &QAction::triggered,  [=](){ player()->aspectRatio(ASPECT_RATIO_14_10); });
+
+    QAction* aspectRatio3_2 = new QAction(tr("3:2"), aspectRatioMenu);
+    connect(aspectRatio3_2, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_3_2); });
+
+    QAction* aspectRatio14_9 = new QAction(tr("14:9"), aspectRatioMenu);
+    connect(aspectRatio14_9, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_14_9); });
+
+    QAction* aspectRatio16_10 = new QAction(tr("16_10"), aspectRatioMenu);
+    connect(aspectRatio16_10, &QAction::triggered,  [=](){ player()->aspectRatio(ASPECT_RATIO_16_10); });
+
+    QAction* aspectRatio16_9 = new QAction(tr("16:9"), aspectRatioMenu);
+    connect(aspectRatio16_9, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_16_9); });
+
+    QAction* aspectRatio235_1 = new QAction(tr("2.35:1"), aspectRatioMenu);
+    connect(aspectRatio235_1, &QAction::triggered,  [=](){ player()->aspectRatio(ASPECT_RATIO_2_35_1); });
+
+    aspectRatioMenu->addAction(aspectRatioAuto);
+    aspectRatioMenu->addAction(aspectRatio1_1);
+    aspectRatioMenu->addAction(aspectRatio5_4);
+    aspectRatioMenu->addAction(aspectRatio4_3);
+    aspectRatioMenu->addAction(aspectRatio11_8);
+    aspectRatioMenu->addAction(aspectRatio14_10);
+    aspectRatioMenu->addAction(aspectRatio3_2);
+    aspectRatioMenu->addAction(aspectRatio14_9);
+    aspectRatioMenu->addAction(aspectRatio16_10);
+    aspectRatioMenu->addAction(aspectRatio16_9);
+    aspectRatioMenu->addAction(aspectRatio235_1);
+
+    profilesMenu->addMenu(aspectRatioMenu);
+
     menuBar->addMenu(profilesMenu);
-
-
 
     //Setup status bar
     statusBar = new QStatusBar(this);

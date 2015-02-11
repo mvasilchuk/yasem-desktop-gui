@@ -12,6 +12,7 @@
 #include <QHash>
 #include <QMargins>
 #include <QToolBar>
+#include <QMenu>
 
 #include <QEvent>
 #include <QKeyEvent>
@@ -37,7 +38,7 @@ void MainWindow::setupGui()
     QHBoxLayout* main = new QHBoxLayout;
     QStackedLayout* stackedLayout = new QStackedLayout;
 
-    browser()->parent(this);
+    browser()->setParentWidget(this);
     stackedLayout->addWidget(browser()->widget());
 
     if(player() != NULL)
@@ -71,17 +72,17 @@ void MainWindow::setupGui()
 void MainWindow::setupMenu()
 {
     //Setup menu
-    menuBar = new QMenuBar(this);
+    menuBar = new QMenuBar(centralWidget());
     this->setMenuBar(menuBar);
 
-    QMenu* fileMenu = new QMenu(tr("File"), this);
+    QMenu* fileMenu = new QMenu(tr("File"), menuBar);
 
     QAction *exitAction = new QAction(tr("Exit"), this);
     connect(exitAction, &QAction::triggered, this, &MainWindow::close);
 
     fileMenu->addAction(exitAction);
 
-    QMenu* profilesMenu = new QMenu(tr("Profiles"), this);
+    QMenu* profilesMenu = new QMenu(tr("Profiles"));
 
     QAction *backToMainPage = new QAction(tr("Back to main page"), this);
     connect(backToMainPage, &QAction::triggered, []() {
@@ -89,11 +90,23 @@ void MainWindow::setupMenu()
     });
 
     profilesMenu->addAction(backToMainPage);
+    profilesMenu->addSeparator();
+    profilesMenu->addSection(tr("Profiles"));
+
+    for(Profile* profile: ProfileManager::instance()->getProfiles())
+    {
+        QAction* loadProfile = new QAction(profile->getName(), profilesMenu);
+        connect(loadProfile, &QAction::triggered, [=]() {
+            ProfileManager::instance()->setActiveProfile(profile);
+        });
+        profilesMenu->addAction(loadProfile);
+    }
 
     menuBar->addMenu(fileMenu);
 
+    QMenu* videoMenu = new QMenu(tr("Video"), menuBar);
 
-    QMenu* aspectRatioMenu = new QMenu(tr("Aspect ratio"));
+    QMenu* aspectRatioMenu = new QMenu(tr("Aspect ratio"), videoMenu);
 
     QAction* aspectRatioAuto = new QAction(tr("Auto"), aspectRatioMenu);
     connect(aspectRatioAuto, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_AUTO); });
@@ -140,9 +153,14 @@ void MainWindow::setupMenu()
     aspectRatioMenu->addAction(aspectRatio16_9);
     aspectRatioMenu->addAction(aspectRatio235_1);
 
-    profilesMenu->addMenu(aspectRatioMenu);
+    videoMenu->addMenu(aspectRatioMenu);
 
+    menuBar->addMenu(videoMenu);
     menuBar->addMenu(profilesMenu);
+
+    m_menuItems.append(fileMenu);
+    m_menuItems.append(videoMenu);
+    m_menuItems.append(profilesMenu);
 
     //Setup status bar
     statusBar = new QStatusBar(this);
@@ -157,8 +175,6 @@ void MainWindow::setupMenu()
     connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile) {
         statusBar->showMessage(tr("Profile:").append(profile->getName()));
     });
-
-
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *e) {
@@ -292,26 +308,7 @@ void MainWindow::onMousePositionChanged(int position)
 
     if(isFullScreen())
     {
-        bool top = (position & MOUSE_POSITION::TOP) == MOUSE_POSITION::TOP;
         bool bottom = (position & MOUSE_POSITION::BOTTOM) == MOUSE_POSITION::BOTTOM;
-
-        if(top && !menuBar->isVisible())
-        {
-           menuBar->setWindowFlags(Qt::WindowStaysOnTopHint);  // menu widget is child of mainwidget(central Widget of main window) and is not in layout
-           menuBar->raise();
-           menuBar->show();
-
-           //resizeWebView();
-        }
-        else
-        {
-            if(!top && menuBar->isVisible())
-            {
-                menuBar->hide();
-                browser()->parent()->resize(this->size());
-                resizeWebView();
-            }
-        }
 
         if(bottom && !statusBar->isVisible())
         {
@@ -328,7 +325,7 @@ void MainWindow::onMousePositionChanged(int position)
             statusBarPanel->setStyleSheet("");
             this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
             statusBarPanel->hide();
-            browser()->parent()->resize(this->size());
+            browser()->getParentWidget()->resize(this->size());
             resizeWebView();
         }
     }
@@ -414,6 +411,11 @@ void MainWindow::player(MediaPlayerPlugin *playerPlugin)
 MediaPlayerPlugin *MainWindow::player()
 {
     return this->playerPlugin;
+}
+
+QList<QMenu*> MainWindow::getMenuItems()
+{
+    return m_menuItems;
 }
 
 void MainWindow::addErrorToList(const QString &msg)

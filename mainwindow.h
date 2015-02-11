@@ -52,11 +52,14 @@ public:
     virtual void player(MediaPlayerPlugin* playerPlugin);
     virtual MediaPlayerPlugin* player();
 
+     QList<QMenu*> getMenuItems();
+
 protected:
     void changeEvent(QEvent *e);
     bool event(QEvent *event);
 
     DesktopGUI* desktopGui;
+    QList<QMenu*> m_menuItems;
 
 private:
     QMenuBar *menuBar;

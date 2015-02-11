@@ -4,6 +4,7 @@
 #include "profilemanager.h"
 
 #include <QApplication>
+#include <QMenu>
 
 using namespace yasem;
 
@@ -76,4 +77,9 @@ void DesktopGUI::register_roles()
 {
     register_role(ROLE_GUI);
     register_role(ROLE_STB_API_SYSTEM);
+}
+
+QList<QMenu*> DesktopGUI::getMenuItems()
+{
+    return mainWindow->getMenuItems();
 }

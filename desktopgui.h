@@ -7,11 +7,12 @@
 #include "datasourceplugin.h"
 #include "stbplugin.h"
 
+class QMenu;
+
 namespace yasem
 {
 
 class MainWindow;
-
 class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public GuiPlugin, public Plugin
 {
     Q_OBJECT
@@ -22,6 +23,15 @@ class DESKTOPGUISHARED_EXPORT DesktopGUI: public QObject, public GuiPlugin, publ
     Q_CLASSINFO("description", "Desktop GUI for YASEM")
 public:
     explicit DesktopGUI();
+    
+    QRect getWindowRect();
+    void setWindowRect(const QRect &rect);
+
+    void setFullscreen(bool fullscreen);
+    bool getFullscreen();
+
+    void repaintGui();
+    QList<QMenu*> getMenuItems();
 
     // Plugin interface
 
@@ -39,13 +49,6 @@ protected:
 
     // GuiPlugin interface
 public:
-    QRect getWindowRect();
-    void setWindowRect(const QRect &rect);
-
-    void setFullscreen(bool fullscreen);
-    bool getFullscreen();
-
-    virtual void repaintGui();
 
 
     // Plugin interface

@@ -82,6 +82,8 @@ void MainWindow::setupMenu()
 
     fileMenu->addAction(exitAction);
 
+    // Profiles
+
     QMenu* profilesMenu = new QMenu(tr("Profiles"));
 
     QAction *backToMainPage = new QAction(tr("Back to main page"), this);
@@ -90,76 +92,136 @@ void MainWindow::setupMenu()
     });
 
     profilesMenu->addAction(backToMainPage);
-    profilesMenu->addSeparator();
     profilesMenu->addSection(tr("Profiles"));
+
+    connect(profilesMenu, &QMenu::triggered, [=](QAction* action) {
+        ProfileManager::instance()->setActiveProfile(ProfileManager::instance()->findById(action->data().toString()));
+    });
+
+    connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile){
+        for(QAction* action: profilesMenu->actions())
+        {
+            if(action->data().toString() == profile->getId())
+            {
+                action->setChecked(true);
+                profilesMenu->setActiveAction(action);
+            }
+            else
+            {
+                action->setChecked(false);
+            }
+        }
+    });
 
     for(Profile* profile: ProfileManager::instance()->getProfiles())
     {
-        QAction* loadProfile = new QAction(profile->getName(), profilesMenu);
-        connect(loadProfile, &QAction::triggered, [=]() {
-            ProfileManager::instance()->setActiveProfile(profile);
-        });
-        profilesMenu->addAction(loadProfile);
+        if(!profile->hasFlag(Profile::HIDDEN))
+        {
+            QAction* loadProfile = new QAction(profile->getName(), profilesMenu);
+            loadProfile->setData(profile->getId());
+            loadProfile->setCheckable(true);
+            loadProfile->setChecked(false);
+            profilesMenu->addAction(loadProfile);
+        }
     }
 
-    menuBar->addMenu(fileMenu);
-
+    // Video menu
     QMenu* videoMenu = new QMenu(tr("Video"), menuBar);
 
     QMenu* aspectRatioMenu = new QMenu(tr("Aspect ratio"), videoMenu);
 
-    QAction* aspectRatioAuto = new QAction(tr("Auto"), aspectRatioMenu);
-    connect(aspectRatioAuto, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_AUTO); });
+    connect(aspectRatioMenu, &QMenu::triggered, [=](QAction* action){
+        player()->aspectRatio((ASPECT_RATIO) action->data().toInt());
+        aspectRatioMenu->setActiveAction(action);
+        for(QAction* a: aspectRatioMenu->actions())
+        {
+            a->setChecked(a == action);
+        }
 
-    QAction* aspectRatio1_1 = new QAction(tr("1:1"), aspectRatioMenu);
-    connect(aspectRatio1_1, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_1_1); });
+    });
 
-    QAction* aspectRatio5_4 = new QAction(tr("5:4"), aspectRatioMenu);
-    connect(aspectRatio5_4, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_5_4); });
+    connect(aspectRatioMenu, &QMenu::aboutToShow, [=]{
+        ASPECT_RATIO current_ratio = player()->aspectRatio();
+        for(QAction* action: aspectRatioMenu->actions())
+        {
+            ASPECT_RATIO ratio = (ASPECT_RATIO) action->data().toInt();
+            if(ratio == current_ratio)
+            {
+                aspectRatioMenu->setActiveAction(action);
+                action->setChecked(true);
+                break;
+            }
+            else
+            {
+                action->setChecked(false);
+            }
+        }
+    });
 
-    QAction* aspectRatio4_3 = new QAction(tr("4:3"), aspectRatioMenu);
-    connect(aspectRatio4_3, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_4_3); });
+    QList<QPair<QString, ASPECT_RATIO>> ratios;
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("Auto"),     ASPECT_RATIO_AUTO));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("1:1"),      ASPECT_RATIO_1_1));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("5:4"),      ASPECT_RATIO_5_4));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("4:3"),      ASPECT_RATIO_4_3));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("11:8"),     ASPECT_RATIO_11_8));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("14:10"),    ASPECT_RATIO_14_10));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("3:2"),      ASPECT_RATIO_3_2));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("14:9"),     ASPECT_RATIO_14_9));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("16:10"),    ASPECT_RATIO_16_10));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("16:9"),     ASPECT_RATIO_16_9));
+    ratios.append(QPair<QString, ASPECT_RATIO>(tr("2.35:1"),  ASPECT_RATIO_2_35_1));
 
-    QAction* aspectRatio11_8 = new QAction(tr("11_8"), aspectRatioMenu);
-    connect(aspectRatio11_8, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_11_8); });
-
-    QAction* aspectRatio14_10 = new QAction(tr("14:10"), aspectRatioMenu);
-    connect(aspectRatio14_10, &QAction::triggered,  [=](){ player()->aspectRatio(ASPECT_RATIO_14_10); });
-
-    QAction* aspectRatio3_2 = new QAction(tr("3:2"), aspectRatioMenu);
-    connect(aspectRatio3_2, &QAction::triggered,    [=](){ player()->aspectRatio(ASPECT_RATIO_3_2); });
-
-    QAction* aspectRatio14_9 = new QAction(tr("14:9"), aspectRatioMenu);
-    connect(aspectRatio14_9, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_14_9); });
-
-    QAction* aspectRatio16_10 = new QAction(tr("16_10"), aspectRatioMenu);
-    connect(aspectRatio16_10, &QAction::triggered,  [=](){ player()->aspectRatio(ASPECT_RATIO_16_10); });
-
-    QAction* aspectRatio16_9 = new QAction(tr("16:9"), aspectRatioMenu);
-    connect(aspectRatio16_9, &QAction::triggered,   [=](){ player()->aspectRatio(ASPECT_RATIO_16_9); });
-
-    QAction* aspectRatio235_1 = new QAction(tr("2.35:1"), aspectRatioMenu);
-    connect(aspectRatio235_1, &QAction::triggered,  [=](){ player()->aspectRatio(ASPECT_RATIO_2_35_1); });
-
-    aspectRatioMenu->addAction(aspectRatioAuto);
-    aspectRatioMenu->addAction(aspectRatio1_1);
-    aspectRatioMenu->addAction(aspectRatio5_4);
-    aspectRatioMenu->addAction(aspectRatio4_3);
-    aspectRatioMenu->addAction(aspectRatio11_8);
-    aspectRatioMenu->addAction(aspectRatio14_10);
-    aspectRatioMenu->addAction(aspectRatio3_2);
-    aspectRatioMenu->addAction(aspectRatio14_9);
-    aspectRatioMenu->addAction(aspectRatio16_10);
-    aspectRatioMenu->addAction(aspectRatio16_9);
-    aspectRatioMenu->addAction(aspectRatio235_1);
+    for(QPair<QString, ASPECT_RATIO> pair: ratios)
+    {
+        QString name = pair.first;
+        ASPECT_RATIO ratio = pair.second;
+        QAction* action = new QAction(name, aspectRatioMenu);
+        action->setData(ratio);
+        action->setCheckable(true);
+        action->setChecked(false);
+        aspectRatioMenu->addAction(action);
+    }
 
     videoMenu->addMenu(aspectRatioMenu);
 
+    // Audio menu
+    QMenu* audioMenu = new QMenu(tr("Audio"), menuBar);
+    QMenu* audioTrackMenu = new QMenu(tr("Track"), audioMenu);
+
+    connect(audioTrackMenu, &QMenu::triggered, [=](QAction* action){
+        player()->setAudioLanguage(action->data().toInt());
+        audioTrackMenu->setActiveAction(action);
+        for(QAction* a: audioTrackMenu->actions())
+        {
+            action->setChecked(a == action);
+        }
+    });
+
+    connect(audioTrackMenu, &QMenu::aboutToShow, [=]{
+        audioTrackMenu->clear();
+
+        int index = player()->audioPID();
+        QList<AudioLangInfo> languages = player()->getAudioLanguages();
+        for(const AudioLangInfo &lang: languages)
+        {
+            QAction* action = new QAction(lang.code3, audioTrackMenu);
+            action->setData(lang.pid);
+            action->setCheckable(true);
+            action->setChecked(lang.pid == index);
+            audioTrackMenu->addAction(action);
+        }
+    });
+
+    audioMenu->addMenu(audioTrackMenu);
+
+    menuBar->addMenu(fileMenu);
     menuBar->addMenu(videoMenu);
+    menuBar->addMenu(audioMenu);
     menuBar->addMenu(profilesMenu);
 
     m_menuItems.append(fileMenu);
     m_menuItems.append(videoMenu);
+    m_menuItems.append(audioMenu);
     m_menuItems.append(profilesMenu);
 
     //Setup status bar

@@ -170,10 +170,17 @@ void MainWindow::setupMenu()
     statusBarPanel->setObjectName("statusBarPanel");
     statusBarPanel->addWidget(statusBar);
     statusBarPanel->setMovable(false);
+
+    currentProfileStatusBarLabel = new QLabel(statusBar);
+    statusBar->addWidget(currentProfileStatusBarLabel);
+
+    pageLoadingProgressStatusBarLabel = new QLabel(statusBar);
+    statusBar->addWidget(pageLoadingProgressStatusBarLabel);
+
     this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
 
     connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile) {
-        statusBar->showMessage(tr("Profile:").append(profile->getName()));
+        currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
 }
 
@@ -269,8 +276,6 @@ void MainWindow::changeEvent(QEvent *e)
         break;
     }
 }
-
-
 
 bool MainWindow::event(QEvent *event)
 {

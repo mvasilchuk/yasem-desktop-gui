@@ -76,6 +76,9 @@ private:
     QGroupBox* errorGroupBox;
     QVBoxLayout* errorBoxLayout;
 
+    QLabel* currentProfileStatusBarLabel;
+    QLabel* pageLoadingProgressStatusBarLabel;
+
 
 public slots:
     void closeEvent(QCloseEvent *event);

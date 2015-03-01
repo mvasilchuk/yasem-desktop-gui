@@ -46,8 +46,6 @@ PLUGIN_ERROR_CODES DesktopGUI::initialize()
 
     DEBUG() << "========== Starting desktop GUI ==========";
 
-
-
     ProfileManager::instance()->loadProfiles();
 
     mainWindow = new MainWindow();
@@ -82,4 +80,9 @@ void DesktopGUI::register_roles()
 QList<QMenu*> DesktopGUI::getMenuItems()
 {
     return mainWindow->getMenuItems();
+}
+
+QRect DesktopGUI::widgetRect()
+{
+    return mainWindow->windowInternalRect();
 }

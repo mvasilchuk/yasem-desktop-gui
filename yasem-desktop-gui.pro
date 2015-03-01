@@ -19,13 +19,15 @@ INCLUDEPATH += ../../yasem-core
 
 SOURCES += desktopgui.cpp \
     mainwindow.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    pluginsdialog.cpp
 
 HEADERS += desktopgui.h\
     desktopgui_global.h \
     mainwindow.h \
     settingsdialog.h  \
-    ../../yasem-core/profilemanager.h
+    ../../yasem-core/profilemanager.h \
+    pluginsdialog.h
 
 unix {
     target.path = /usr/lib

@@ -5,6 +5,7 @@
 #include "profilemanager.h"
 #include "browserplugin.h"
 #include "stbprofile.h"
+#include "pluginsdialog.h"
 
 
 #include <QHBoxLayout>
@@ -27,13 +28,16 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreGeometry(settings->value("geometry").toByteArray());
     restoreState(settings->value("window_state").toByteArray());
     settings->endGroup();
+
+    statusBarPanel = NULL;
+    menuBar = NULL;
 }
 
 
 void MainWindow::setupGui()
 {
-    Q_ASSERT(dynamic_cast<BrowserPlugin*>(browser()));
-    Q_ASSERT(dynamic_cast<MediaPlayerPlugin*>(player()));
+    Q_ASSERT_X(dynamic_cast<BrowserPlugin*>(browser()), "MainWindow::setupGui", "Browser player plugin not found!");
+    Q_ASSERT_X(dynamic_cast<MediaPlayerPlugin*>(player()), "MainWindow::setupGui", "Media player plugin not found!");
 
     QHBoxLayout* main = new QHBoxLayout;
     QStackedLayout* stackedLayout = new QStackedLayout;
@@ -214,16 +218,35 @@ void MainWindow::setupMenu()
 
     audioMenu->addMenu(audioTrackMenu);
 
+    //About
+
+    QMenu* aboutMenu = new QMenu(tr("About"));
+
+    QAction* aboutAppAction = new QAction(tr("About application..."), aboutMenu);
+    QAction* aboutPluginsAction = new QAction(tr("About plugins..."), aboutMenu);
+    connect(aboutPluginsAction, &QAction::triggered, [=]() {
+       PluginsDialog dialog;
+       dialog.exec();
+       dialog.show();
+    });
+
+    aboutMenu->addAction(aboutAppAction);
+    aboutMenu->addAction(aboutPluginsAction);
+
     menuBar->addMenu(fileMenu);
     menuBar->addMenu(videoMenu);
     menuBar->addMenu(audioMenu);
     menuBar->addMenu(profilesMenu);
+    menuBar->addMenu(aboutMenu);
 
     m_menuItems.append(fileMenu);
     m_menuItems.append(videoMenu);
     m_menuItems.append(audioMenu);
-    m_menuItems.append(profilesMenu);
+    m_menuItems.append(profilesMenu);  
+}
 
+void MainWindow::setupStatusBar()
+{
     //Setup status bar
     statusBar = new QStatusBar(this);
     //setStatusBar(statusBar);
@@ -284,14 +307,13 @@ void MainWindow::setAppFullscreen(bool fullscreen)
 
 MainWindow::~MainWindow()
 {
-    //delete ui;
 
 }
 
 
 void MainWindow::initialize()
 {
-    DEBUG() << "initialize()";
+    DEBUG() << "MainWindow::initialize()";
 
     stb(dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole(ROLE_STB_API)));
     if(!stb())
@@ -303,8 +325,11 @@ void MainWindow::initialize()
     gui(dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI)));
     browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 
+    browser()->createNewPage();
+
     setupGui();
     setupMenu();
+    setupStatusBar();
 
     if(QCoreApplication::arguments().contains(arguments[FULLSCREEN_APP]))
     {
@@ -483,6 +508,22 @@ MediaPlayerPlugin *MainWindow::player()
 QList<QMenu*> MainWindow::getMenuItems()
 {
     return m_menuItems;
+}
+
+QRect MainWindow::windowInternalRect()
+{
+    if(isFullScreen())
+        return rect();
+
+    int height_diff = 0;
+    if(statusBarPanel)
+        height_diff = statusBarPanel->height();
+
+    if(menuBar)
+        height_diff += menuBar->height();
+
+    QRect new_rect(rect().x(), rect().y(), rect().width(), rect().height() - height_diff);
+    return new_rect;
 }
 
 void MainWindow::addErrorToList(const QString &msg)

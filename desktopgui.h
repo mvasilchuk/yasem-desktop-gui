@@ -32,6 +32,7 @@ public:
 
     void repaintGui();
     QList<QMenu*> getMenuItems();
+    QRect widgetRect();
 
     // Plugin interface
 

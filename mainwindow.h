@@ -22,7 +22,6 @@
 
 namespace yasem {
 
-
 class DesktopGUI;
 
 class MainWindow : public QMainWindow
@@ -53,6 +52,7 @@ public:
     virtual MediaPlayerPlugin* player();
 
      QList<QMenu*> getMenuItems();
+     QRect windowInternalRect();
 
 protected:
     void changeEvent(QEvent *e);
@@ -88,6 +88,7 @@ public slots:
 
     void setupGui();
     void setupMenu();
+    void setupStatusBar();
     void mouseDoubleClickEvent(QMouseEvent *e);
     void mousePressEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent *e);

@@ -3,6 +3,7 @@
 
 #include <QTableWidget>
 #include <QDialog>
+#include <QPushButton>
 
 namespace yasem {
 
@@ -16,6 +17,7 @@ public:
 protected:
     void changeEvent(QEvent *e);
     QTableWidget* pluginsTable;
+    QPushButton* okButton;
 
     void setupGui();
     void updateTable();

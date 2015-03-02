@@ -19,6 +19,9 @@
 #include <QScrollArea>
 #include <QGroupBox>
 #include <QVBoxLayout>
+#include <QPushButton>
+
+class QQuickView;
 
 namespace yasem {
 
@@ -78,6 +81,8 @@ private:
 
     QLabel* currentProfileStatusBarLabel;
     QLabel* pageLoadingProgressStatusBarLabel;
+    QQuickView* messageView;
+    QPushButton* notificationIconBtn;
 
 
 public slots:
@@ -97,6 +102,9 @@ public slots:
 
     void addErrorToList(const QString &msg);
     void onMousePositionChanged(int position);
+
+    void checkDependencies();
+    void showNotificationIcon(bool show);
 
 };
 

@@ -6,6 +6,7 @@
 #include "browserplugin.h"
 #include "stbprofile.h"
 #include "pluginsdialog.h"
+#include "aboutappdialog.h"
 
 
 #include <QHBoxLayout>
@@ -17,6 +18,10 @@
 
 #include <QEvent>
 #include <QKeyEvent>
+#include <QQmlEngine>
+#include <QQuickView>
+#include <QQmlComponent>
+#include <QQmlContext>
 
 using namespace yasem;
 
@@ -31,19 +36,27 @@ MainWindow::MainWindow(QWidget *parent) :
 
     statusBarPanel = NULL;
     menuBar = NULL;
-}
 
+    gui(NULL);
+    browser(NULL);
+    player(NULL);
+    datasource(NULL);
+    messageView = NULL;
+    notificationIconBtn = NULL;
+}
 
 void MainWindow::setupGui()
 {
-    Q_ASSERT_X(dynamic_cast<BrowserPlugin*>(browser()), "MainWindow::setupGui", "Browser player plugin not found!");
-    Q_ASSERT_X(dynamic_cast<MediaPlayerPlugin*>(player()), "MainWindow::setupGui", "Media player plugin not found!");
-
     QHBoxLayout* main = new QHBoxLayout;
     QStackedLayout* stackedLayout = new QStackedLayout;
 
-    browser()->setParentWidget(this);
-    stackedLayout->addWidget(browser()->widget());
+    if(browser())
+    {
+        browser()->setParentWidget(this);
+        stackedLayout->addWidget(browser()->widget());
+    }
+    else
+        ERROR() << "Browser plugin not found! The app may not work correctly!";
 
     if(player() != NULL)
     {
@@ -64,11 +77,13 @@ void MainWindow::setupGui()
     if(player())
         player()->raise();
 
-    browser()->raise();
+    if(browser())
+        browser()->raise();
 
     //centralWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking(true);
-    browser()->setupMousePositionHandler(this, SLOT(onMousePositionChanged(int)));
+    if(browser())
+        browser()->setupMousePositionHandler(this, SLOT(onMousePositionChanged(int)));
 
     resizeWebView();
 }
@@ -99,7 +114,11 @@ void MainWindow::setupMenu()
     profilesMenu->addSection(tr("Profiles"));
 
     connect(profilesMenu, &QMenu::triggered, [=](QAction* action) {
-        ProfileManager::instance()->setActiveProfile(ProfileManager::instance()->findById(action->data().toString()));
+        Profile* profile = ProfileManager::instance()->findById(action->data().toString());
+        if(profile != NULL)
+            ProfileManager::instance()->setActiveProfile(profile);
+        else
+            WARN() << qPrintable(QString("Can't load profile %1 from profiles menu!").arg(action->data().toString()));
     });
 
     connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile){
@@ -135,16 +154,20 @@ void MainWindow::setupMenu()
     QMenu* aspectRatioMenu = new QMenu(tr("Aspect ratio"), videoMenu);
 
     connect(aspectRatioMenu, &QMenu::triggered, [=](QAction* action){
-        player()->aspectRatio((ASPECT_RATIO) action->data().toInt());
+        if(player())
+            player()->aspectRatio((ASPECT_RATIO) action->data().toInt());
         aspectRatioMenu->setActiveAction(action);
         for(QAction* a: aspectRatioMenu->actions())
         {
-            a->setChecked(a == action);
+            a->setChecked(a == action && player());
         }
 
     });
 
     connect(aspectRatioMenu, &QMenu::aboutToShow, [=]{
+        if(!player())
+            return;
+
         ASPECT_RATIO current_ratio = player()->aspectRatio();
         for(QAction* action: aspectRatioMenu->actions())
         {
@@ -193,6 +216,9 @@ void MainWindow::setupMenu()
     QMenu* audioTrackMenu = new QMenu(tr("Track"), audioMenu);
 
     connect(audioTrackMenu, &QMenu::triggered, [=](QAction* action){
+        if(!player())
+            return;
+
         player()->setAudioLanguage(action->data().toInt());
         audioTrackMenu->setActiveAction(action);
         for(QAction* a: audioTrackMenu->actions())
@@ -203,6 +229,8 @@ void MainWindow::setupMenu()
 
     connect(audioTrackMenu, &QMenu::aboutToShow, [=]{
         audioTrackMenu->clear();
+        if(!player())
+            return;
 
         int index = player()->audioPID();
         QList<AudioLangInfo> languages = player()->getAudioLanguages();
@@ -223,6 +251,13 @@ void MainWindow::setupMenu()
     QMenu* aboutMenu = new QMenu(tr("About"));
 
     QAction* aboutAppAction = new QAction(tr("About application..."), aboutMenu);
+    connect(aboutAppAction, &QAction::triggered, [=]() {
+       AboutAppDialog dialog;
+       dialog.exec();
+       dialog.show();
+    });
+
+
     QAction* aboutPluginsAction = new QAction(tr("About plugins..."), aboutMenu);
     connect(aboutPluginsAction, &QAction::triggered, [=]() {
        PluginsDialog dialog;
@@ -267,6 +302,12 @@ void MainWindow::setupStatusBar()
     connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile) {
         currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
+
+    notificationIconBtn = new QPushButton(statusBar);
+    notificationIconBtn->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
+    notificationIconBtn->setFlat(true);
+    notificationIconBtn->setVisible(false);
+    statusBar->addWidget(notificationIconBtn);
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *e) {
@@ -301,7 +342,8 @@ void MainWindow::setAppFullscreen(bool fullscreen)
         statusBarPanel->show();
         menuBar->show();
     }
-    browser()->fullscreen(fullscreen);
+    if(browser())
+        browser()->fullscreen(fullscreen);
     //resizeWebView();
 }
 
@@ -325,7 +367,8 @@ void MainWindow::initialize()
     gui(dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI)));
     browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 
-    browser()->createNewPage();
+    if(browser())
+        browser()->createNewPage();
 
     setupGui();
     setupMenu();
@@ -338,13 +381,15 @@ void MainWindow::initialize()
 
     QString configProfileSubmoduleId = "web-gui-config";
     StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole(ROLE_WEB_GUI));
-    Q_ASSERT(stbPlugin);
+    Q_ASSERT_X(stbPlugin, "MainWindow::initialize", "Web GUI STB plugin not found!");
 
     Profile* profile = ProfileManager::instance()->findById(configProfileSubmoduleId);
-    Q_ASSERT(profile);
-    ProfileManager::instance()->setActiveProfile(profile);
+    if(profile != NULL)
+        ProfileManager::instance()->setActiveProfile(profile);
+    else
+        WARN() << qPrintable(QString("Can't load Web GUI configuration profile"));
 
-    //connect(Core::instance(), &Core::methodNotImplemented, this, &MainWindow::methodNotImplementedHandler);
+    //checkDependencies();
 }
 
 void MainWindow::resizeEvent(QResizeEvent * /* event */)
@@ -410,17 +455,55 @@ void MainWindow::onMousePositionChanged(int position)
             statusBarPanel->setStyleSheet("background:rgba(128, 128, 128, 0.2); color: black;");
             statusBarPanel->raise();
             statusBarPanel->show();
-            //resizeWebView();
         }
         else if(!bottom && statusBar->isVisible())
         {
             statusBarPanel->setStyleSheet("");
             this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
             statusBarPanel->hide();
-            browser()->getParentWidget()->resize(this->size());
+            if(browser())
+                browser()->getParentWidget()->resize(this->size());
             resizeWebView();
         }
     }
+}
+
+void MainWindow::checkDependencies()
+{
+    QStringList lines;
+
+    for(Plugin* plugin: PluginManager::instance()->getPlugins(ROLE_ANY, false))
+    {
+        QStringList list;
+        for(PluginDependency dependency: plugin->dependencies())
+        {
+            if(dependency.isRequired())
+            {
+                list.append(dependency.roleName());
+            }
+        }
+        if(!list.isEmpty())
+        {
+            lines.append(QString("%1: %2").arg(plugin->getName()).arg(list.join(", ")));
+        }
+    }
+
+    if(!lines.isEmpty())
+    {
+        if(messageView == NULL)
+            messageView = new QQuickView(QUrl("qrc:/MessageWindow.qml"));
+        QObject *rootObject = (QObject*)messageView->rootObject();
+        QObject* plugins_table = rootObject->findChild<QObject*>("plugins_table");
+
+        QMetaObject::invokeMethod(plugins_table, "readValues",
+                Q_ARG(QVariant, QVariant::fromValue(lines)));
+        messageView->show();
+    }
+}
+
+void MainWindow::showNotificationIcon(bool show)
+{
+    notificationIconBtn->setVisible(show);
 }
 
 
@@ -445,14 +528,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::moveVideo(int left, int top)
 {
-    player()->move(left, top);
+    if(player())
+        player()->move(left, top);
 }
 
 void MainWindow::resizeWebView()
 {
-    //browser()->parent()->resize(this->size());
-    browser()->resize();
-    player()->setViewport(browser()->rect(), browser()->scale(), player()->fixedRect());
+    if(browser())
+    {
+        browser()->resize();
+        if(player())
+            player()->setViewport(browser()->rect(), browser()->scale(), player()->fixedRect());
+    }
 }
 
 void MainWindow::browser(BrowserPlugin *browserPlugin)

@@ -4,6 +4,9 @@
 #include <QGridLayout>
 #include <QDesktopWidget>
 #include <QApplication>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSpacerItem>
 
 using namespace yasem;
 
@@ -29,18 +32,33 @@ void PluginsDialog::setupGui()
 {
     setWindowTitle(tr("Plugins"));
     setModal(true);
-    setMinimumWidth(600);
-    setMinimumHeight(400);
+    setMinimumWidth(400);
+    setMinimumHeight(300);
 
     move(QApplication::desktop()->screen()->rect().center() - rect().center());
 
+    QVBoxLayout* main_layout = new QVBoxLayout(this);
+
     pluginsTable = new QTableWidget(this);
+    main_layout->addWidget(pluginsTable);
 
-    QGridLayout* gridLayout = new QGridLayout(this);
-    gridLayout->addWidget(pluginsTable);
+    okButton = new QPushButton(tr("OK"), this);
+    connect(okButton, &QPushButton::pressed, [=]() {
+        close();
+    });
 
-    setLayout(gridLayout);
+    QHBoxLayout* hbox_layout = new QHBoxLayout();
+    hbox_layout->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+    hbox_layout->addWidget(okButton);
+    hbox_layout->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
+    main_layout->addItem(hbox_layout);
+
+    setLayout(main_layout);
+}
+
+void PluginsDialog::updateTable()
+{
     pluginsTable->setRowCount(0);
     pluginsTable->setColumnCount(3);
 
@@ -48,12 +66,6 @@ void PluginsDialog::setupGui()
     pluginsTable->setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Active")));
     pluginsTable->setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Version")));
 
-    pluginsTable->setColumnWidth(0, 300);
-}
-
-void PluginsDialog::updateTable()
-{
-    pluginsTable->setRowCount(0);
     QList<Plugin*> plugins = PluginManager::instance()->getPlugins(ROLE_ANY, false);
     int row_index = 0;
     for(Plugin* plugin: plugins)
@@ -64,9 +76,14 @@ void PluginsDialog::updateTable()
         pluginsTable->setItem(row_index, 0, nameItem);
 
         QTableWidgetItem *activeItem = new QTableWidgetItem();
-        activeItem->setFlags(Qt::ItemIsUserCheckable);
+        activeItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | /*Qt::ItemIsEnabled | */ Qt::ItemIsTristate);
         if(plugin->isActive())
-            activeItem->setCheckState(Qt::Checked);
+        {
+            if(plugin->getState() == PLUGIN_STATE_INITIALIZED)
+                activeItem->setCheckState(Qt::Checked);
+            else
+                activeItem->setCheckState(Qt::PartiallyChecked);
+        }
         else
             activeItem->setCheckState(Qt::Unchecked);
         activeItem->setTextAlignment(Qt::AlignCenter);
@@ -74,9 +91,12 @@ void PluginsDialog::updateTable()
 
         QTableWidgetItem *versionItem = new QTableWidgetItem(plugin->getVersion());
         versionItem->setFlags(versionItem->flags() ^ Qt::ItemIsEditable);
+        versionItem->setTextAlignment(Qt::AlignCenter);
         pluginsTable->setItem(row_index, 2, versionItem);
 
         row_index++;
     }
+    pluginsTable->resizeColumnsToContents();
+    pluginsTable->resizeRowsToContents();
 }
 

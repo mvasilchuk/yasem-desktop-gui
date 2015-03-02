@@ -64,11 +64,11 @@ PLUGIN_ERROR_CODES DesktopGUI::deinitialize()
 
 void DesktopGUI::register_dependencies()
 {
-    add_dependency(ROLE_WEB_SERVER);
-    add_dependency(ROLE_BROWSER);
-    add_dependency(ROLE_WEB_GUI);
-    add_dependency(ROLE_DATASOURCE);
-    add_dependency(ROLE_MEDIA);
+    add_dependency(PluginDependency(ROLE_WEB_SERVER, false));
+    add_dependency(PluginDependency(ROLE_BROWSER, true, true));
+    add_dependency(PluginDependency(ROLE_WEB_GUI, true, true));
+    add_dependency(PluginDependency(ROLE_DATASOURCE, true, true));
+    add_dependency(PluginDependency(ROLE_MEDIA, true, true));
 }
 
 void DesktopGUI::register_roles()

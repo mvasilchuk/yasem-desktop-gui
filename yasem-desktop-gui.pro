@@ -6,7 +6,7 @@
 
 VERSION = 0.1.0
 
-QT       += core gui widgets
+QT       += core gui widgets qml quick
 
 TARGET = yasem-desktop-gui
 TEMPLATE = lib
@@ -20,14 +20,16 @@ INCLUDEPATH += ../../yasem-core
 SOURCES += desktopgui.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \
-    pluginsdialog.cpp
+    pluginsdialog.cpp \
+    aboutappdialog.cpp
 
 HEADERS += desktopgui.h\
     desktopgui_global.h \
     mainwindow.h \
     settingsdialog.h  \
     ../../yasem-core/profilemanager.h \
-    pluginsdialog.h
+    pluginsdialog.h \
+    aboutappdialog.h
 
 unix {
     target.path = /usr/lib

@@ -9,8 +9,8 @@
 
 using namespace yasem;
 
-DesktopGuiObject::DesktopGuiObject(Plugin* plugin, QObject* parent):
-    GuiPluginObject(plugin, parent)
+DesktopGuiObject::DesktopGuiObject(Plugin* plugin):
+    GuiPluginObject(plugin)
 {
 
 }

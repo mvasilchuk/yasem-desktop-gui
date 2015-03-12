@@ -14,8 +14,8 @@ class Plugin;
 class DesktopGuiObject: public GuiPluginObject
 {
 public:
-    DesktopGuiObject(Plugin* plugin, QObject* parent = NULL);
-    ~DesktopGuiObject();
+    DesktopGuiObject(Plugin* plugin);
+    virtual ~DesktopGuiObject();
 
     // GuiPlugin interface
 public:

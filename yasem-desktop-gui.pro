@@ -15,21 +15,31 @@ CONFIG += c++11
 
 DEFINES += DESKTOPGUI_LIBRARY
 
-INCLUDEPATH += ../../yasem-core
+INCLUDEPATH += ../../yasem-core/
+DEPENDPATH += ../../yasem-core/
 
 SOURCES += desktopgui.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \
     pluginsdialog.cpp \
-    aboutappdialog.cpp
+    aboutappdialog.cpp \
+    ../../yasem-core/plugin.cpp \
+    desktopguiobject.cpp \
+    ../../yasem-core/mediaplayerpluginobject.cpp
 
-HEADERS += desktopgui.h\
+HEADERS +=\
     desktopgui_global.h \
     mainwindow.h \
     settingsdialog.h  \
     ../../yasem-core/profilemanager.h \
     pluginsdialog.h \
-    aboutappdialog.h
+    aboutappdialog.h \
+    ../../yasem-core/plugin.h \
+    ../../yasem-core/abstractpluginobject.h \
+    ../../yasem-core/mediaplayerpluginobject.h \
+    ../../yasem-core/browserpluginobject.h \
+    desktopguiplugin.h \
+    desktopguiobject.h
 
 unix {
     target.path = /usr/lib

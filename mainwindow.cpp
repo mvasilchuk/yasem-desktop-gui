@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "pluginmanager.h"
-#include "desktopgui.h"
+#include "desktopguiplugin.h"
 #include "core.h"
 #include "profilemanager.h"
-#include "browserplugin.h"
+#include "browserpluginobject.h"
 #include "stbprofile.h"
 #include "pluginsdialog.h"
 #include "aboutappdialog.h"
+#include "mediaplayerpluginobject.h"
 
 
 #include <QHBoxLayout>
@@ -155,7 +156,7 @@ void MainWindow::setupMenu()
 
     connect(aspectRatioMenu, &QMenu::triggered, [=](QAction* action){
         if(player())
-            player()->aspectRatio((ASPECT_RATIO) action->data().toInt());
+            player()->aspectRatio((AspectRatio) action->data().toInt());
         aspectRatioMenu->setActiveAction(action);
         for(QAction* a: aspectRatioMenu->actions())
         {
@@ -168,10 +169,10 @@ void MainWindow::setupMenu()
         if(!player())
             return;
 
-        ASPECT_RATIO current_ratio = player()->aspectRatio();
+        AspectRatio current_ratio = player()->aspectRatio();
         for(QAction* action: aspectRatioMenu->actions())
         {
-            ASPECT_RATIO ratio = (ASPECT_RATIO) action->data().toInt();
+            AspectRatio ratio = (AspectRatio) action->data().toInt();
             if(ratio == current_ratio)
             {
                 aspectRatioMenu->setActiveAction(action);
@@ -185,23 +186,23 @@ void MainWindow::setupMenu()
         }
     });
 
-    QList<QPair<QString, ASPECT_RATIO>> ratios;
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("Auto"),     ASPECT_RATIO_AUTO));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("1:1"),      ASPECT_RATIO_1_1));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("5:4"),      ASPECT_RATIO_5_4));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("4:3"),      ASPECT_RATIO_4_3));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("11:8"),     ASPECT_RATIO_11_8));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("14:10"),    ASPECT_RATIO_14_10));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("3:2"),      ASPECT_RATIO_3_2));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("14:9"),     ASPECT_RATIO_14_9));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("16:10"),    ASPECT_RATIO_16_10));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("16:9"),     ASPECT_RATIO_16_9));
-    ratios.append(QPair<QString, ASPECT_RATIO>(tr("2.35:1"),  ASPECT_RATIO_2_35_1));
+    QList<QPair<QString, AspectRatio>> ratios;
+    ratios.append(QPair<QString, AspectRatio>(tr("Auto"),     ASPECT_RATIO_AUTO));
+    ratios.append(QPair<QString, AspectRatio>(tr("1:1"),      ASPECT_RATIO_1_1));
+    ratios.append(QPair<QString, AspectRatio>(tr("5:4"),      ASPECT_RATIO_5_4));
+    ratios.append(QPair<QString, AspectRatio>(tr("4:3"),      ASPECT_RATIO_4_3));
+    ratios.append(QPair<QString, AspectRatio>(tr("11:8"),     ASPECT_RATIO_11_8));
+    ratios.append(QPair<QString, AspectRatio>(tr("14:10"),    ASPECT_RATIO_14_10));
+    ratios.append(QPair<QString, AspectRatio>(tr("3:2"),      ASPECT_RATIO_3_2));
+    ratios.append(QPair<QString, AspectRatio>(tr("14:9"),     ASPECT_RATIO_14_9));
+    ratios.append(QPair<QString, AspectRatio>(tr("16:10"),    ASPECT_RATIO_16_10));
+    ratios.append(QPair<QString, AspectRatio>(tr("16:9"),     ASPECT_RATIO_16_9));
+    ratios.append(QPair<QString, AspectRatio>(tr("2.35:1"),  ASPECT_RATIO_2_35_1));
 
-    for(QPair<QString, ASPECT_RATIO> pair: ratios)
+    for(QPair<QString, AspectRatio> pair: ratios)
     {
         QString name = pair.first;
-        ASPECT_RATIO ratio = pair.second;
+        AspectRatio ratio = pair.second;
         QAction* action = new QAction(name, aspectRatioMenu);
         action->setData(ratio);
         action->setCheckable(true);
@@ -357,15 +358,10 @@ void MainWindow::initialize()
 {
     DEBUG() << "MainWindow::initialize()";
 
-    stb(dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole(ROLE_STB_API)));
-    if(!stb())
-    {
-        ERROR() << "No STB plugin found! Portal won't work!";
-    }
     datasource(dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(ROLE_DATASOURCE)));
-    player(dynamic_cast<MediaPlayerPlugin*>(PluginManager::instance()->getByRole(ROLE_MEDIA)));
-    gui(dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI)));
-    browser(dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
+    player(dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA)));
+    gui(dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI)));
+    browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 
     if(browser())
         browser()->createNewPage();
@@ -380,19 +376,15 @@ void MainWindow::initialize()
     }
 
     QString configProfileSubmoduleId = "web-gui-config";
-    StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(PluginManager::instance()->getByRole(ROLE_WEB_GUI));
-    Q_ASSERT_X(stbPlugin, "MainWindow::initialize", "Web GUI STB plugin not found!");
 
     Profile* profile = ProfileManager::instance()->findById(configProfileSubmoduleId);
     if(profile != NULL)
         ProfileManager::instance()->setActiveProfile(profile);
     else
         WARN() << qPrintable(QString("Can't load Web GUI configuration profile"));
-
-    //checkDependencies();
 }
 
-void MainWindow::resizeEvent(QResizeEvent * /* event */)
+void MainWindow::resizeEvent(QResizeEvent * )
 {
     resizeWebView();
 }
@@ -411,26 +403,13 @@ void MainWindow::changeEvent(QEvent *e)
 
 bool MainWindow::event(QEvent *event)
 {
-    if(event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent* keyEvent = dynamic_cast<QKeyEvent*>(event);
-        switch(keyEvent->key())
-        {
-            case Qt::Key_F11:
-            {
-                gui()->setFullscreen(!gui()->getFullscreen());
-                return false;
-            }
-        }
-    }
-    else if(event->type() == QEvent::MouseButtonPress)
+    if(event->type() == QEvent::MouseButtonPress)
     {
         QMouseEvent* mEvent = (QMouseEvent*)event;
         if(mEvent->button() == Qt::RightButton)
         {
              event->ignore();
         }
-        //return false;
     }
     else if(event->type() == QEvent::MouseMove)
     {
@@ -534,20 +513,16 @@ void MainWindow::moveVideo(int left, int top)
 
 void MainWindow::resizeWebView()
 {
-    if(browser())
-    {
-        browser()->resize();
-        if(player())
-            player()->setViewport(browser()->rect(), browser()->scale(), player()->fixedRect());
-    }
+    if(browser()) browser()->resize();
+    if(player())  player()->resize();
 }
 
-void MainWindow::browser(BrowserPlugin *browserPlugin)
+void MainWindow::browser(BrowserPluginObject *browserPlugin)
 {
     this->browserPlugin = browserPlugin;
 }
 
-BrowserPlugin *MainWindow::browser()
+BrowserPluginObject *MainWindow::browser()
 {
     return this->browserPlugin;
 }
@@ -562,32 +537,22 @@ DatasourcePlugin *MainWindow::datasource()
     return this->datasourcePlugin;
 }
 
-void MainWindow::stb(StbPlugin *stbPlugin)
-{
-    this->stbPlugin = stbPlugin;
-}
-
-StbPlugin *MainWindow::stb()
-{
-    return this->stbPlugin;
-}
-
-void MainWindow::gui(GuiPlugin *guiPlugin)
+void MainWindow::gui(GuiPluginObject *guiPlugin)
 {
     this->guiPlugin = guiPlugin;
 }
 
-GuiPlugin *MainWindow::gui()
+GuiPluginObject *MainWindow::gui()
 {
     return  this->guiPlugin;
 }
 
-void MainWindow::player(MediaPlayerPlugin *playerPlugin)
+void MainWindow::player(MediaPlayerPluginObject *playerPlugin)
 {
     this->playerPlugin = playerPlugin;
 }
 
-MediaPlayerPlugin *MainWindow::player()
+MediaPlayerPluginObject *MainWindow::player()
 {
     return this->playerPlugin;
 }

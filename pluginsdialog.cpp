@@ -1,5 +1,6 @@
 #include "pluginsdialog.h"
 #include "pluginmanager.h"
+#include "plugin.h"
 
 #include <QGridLayout>
 #include <QDesktopWidget>

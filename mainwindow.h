@@ -1,15 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "desktopgui.h"
-#include "stbplugin.h"
-#include "mediaplayerplugin.h"
-#include "datasourceplugin.h"
-#include "stbplugin.h"
-#include "guiplugin.h"
-#include "browserplugin.h"
-
-
 #include <QMainWindow>
 
 #include <QMenu>
@@ -25,7 +16,11 @@ class QQuickView;
 
 namespace yasem {
 
-class DesktopGUI;
+class DesktopGuiPlugin;
+class BrowserPluginObject;
+class DatasourcePlugin;
+class GuiPluginObject;
+class MediaPlayerPluginObject;
 
 class MainWindow : public QMainWindow
 {
@@ -39,20 +34,17 @@ public:
 
     void initialize();
 
-    virtual void browser(BrowserPlugin* browserPlugin);
-    virtual BrowserPlugin* browser();
+    virtual void browser(BrowserPluginObject* browserPlugin);
+    virtual BrowserPluginObject* browser();
 
     virtual void datasource(DatasourcePlugin* datasourcePlugin);
     virtual DatasourcePlugin* datasource();
 
-    virtual void stb(StbPlugin* stbPlugin);
-    virtual StbPlugin* stb();
+    virtual void gui(GuiPluginObject* guiPlugin);
+    virtual GuiPluginObject* gui();
 
-    virtual void gui(GuiPlugin* guiPlugin);
-    virtual GuiPlugin* gui();
-
-    virtual void player(MediaPlayerPlugin* playerPlugin);
-    virtual MediaPlayerPlugin* player();
+    virtual void player(MediaPlayerPluginObject* playerPlugin);
+    virtual MediaPlayerPluginObject* player();
 
      QList<QMenu*> getMenuItems();
      QRect windowInternalRect();
@@ -61,7 +53,7 @@ protected:
     void changeEvent(QEvent *e);
     bool event(QEvent *event);
 
-    DesktopGUI* desktopGui;
+    DesktopGuiPlugin* desktopGui;
     QList<QMenu*> m_menuItems;
 
 private:
@@ -69,11 +61,10 @@ private:
     QToolBar* statusBarPanel;
     QStatusBar *statusBar;
 
-    BrowserPlugin* browserPlugin;
+    BrowserPluginObject* browserPlugin;
     DatasourcePlugin *datasourcePlugin;
-    StbPlugin *stbPlugin;
-    GuiPlugin* guiPlugin;
-    MediaPlayerPlugin* playerPlugin;
+    GuiPluginObject* guiPlugin;
+    MediaPlayerPluginObject* playerPlugin;
 
     QScrollArea* errorScrollArea;
     QGroupBox* errorGroupBox;

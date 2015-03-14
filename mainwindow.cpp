@@ -57,7 +57,7 @@ void MainWindow::setupGui()
         stackedLayout->addWidget(browser()->widget());
     }
     else
-        ERROR() << "Browser plugin not found! The app may not work correctly!";
+        WARN() << "Browser plugin not found! The app may not work correctly!";
 
     if(player() != NULL)
     {
@@ -68,7 +68,7 @@ void MainWindow::setupGui()
 
     }
     else
-        ERROR() << "No mediplayer plugin found. Media will be disabled!";
+        WARN() << "No mediplayer plugin found. Media will be disabled!";
 
     main->addLayout(stackedLayout);
     QWidget* centralWidget = new QWidget();

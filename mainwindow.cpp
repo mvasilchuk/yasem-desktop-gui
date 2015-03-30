@@ -61,10 +61,10 @@ void MainWindow::setupGui()
 
     if(player() != NULL)
     {
-        player()->aspectRatio(ASPECT_RATIO_AUTO);
+        player()->setAspectRatio(ASPECT_RATIO_AUTO);
         player()->parent(this);
-        stackedLayout->addWidget(player()->widget());
-        player()->show();
+        //stackedLayout->addWidget(player()->widget());
+        player()->hide();
 
     }
     else
@@ -75,11 +75,11 @@ void MainWindow::setupGui()
     centralWidget->setLayout(main);
 
     this->setCentralWidget(centralWidget);
-    if(player())
-        player()->raise();
 
     if(browser())
-        browser()->raise();
+        browser()->setTopWidget(BrowserPluginObject::TOP_WIDGET_BROWSER);
+
+    browser()->widget()->raise();
 
     //centralWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking(true);
@@ -156,7 +156,7 @@ void MainWindow::setupMenu()
 
     connect(aspectRatioMenu, &QMenu::triggered, [=](QAction* action){
         if(player())
-            player()->aspectRatio((AspectRatio) action->data().toInt());
+            player()->setAspectRatio((AspectRatio) action->data().toInt());
         aspectRatioMenu->setActiveAction(action);
         for(QAction* a: aspectRatioMenu->actions())
         {
@@ -169,7 +169,7 @@ void MainWindow::setupMenu()
         if(!player())
             return;
 
-        AspectRatio current_ratio = player()->aspectRatio();
+        AspectRatio current_ratio = player()->getAspectRatio();
         for(QAction* action: aspectRatioMenu->actions())
         {
             AspectRatio ratio = (AspectRatio) action->data().toInt();
@@ -233,7 +233,7 @@ void MainWindow::setupMenu()
         if(!player())
             return;
 
-        int index = player()->audioPID();
+        int index = player()->getAudioPID();
         QList<AudioLangInfo> languages = player()->getAudioLanguages();
         for(const AudioLangInfo &lang: languages)
         {

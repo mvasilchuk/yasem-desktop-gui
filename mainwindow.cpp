@@ -63,9 +63,8 @@ void MainWindow::setupGui()
     {
         player()->setAspectRatio(ASPECT_RATIO_AUTO);
         player()->parent(this);
-        //stackedLayout->addWidget(player()->widget());
-        player()->hide();
-
+        stackedLayout->addWidget(player()->widget());
+        player()->show();
     }
     else
         WARN() << "No mediplayer plugin found. Media will be disabled!";

@@ -30,24 +30,31 @@ void AboutAppDialog::setupGui()
 
     QVBoxLayout* vertical_layout = new QVBoxLayout(this);
 
-    QGridLayout* grid_layout = new QGridLayout(this);
-    QLabel* title = new QLabel(tr("Yasem"), this);
-    title->setAlignment(Qt::AlignCenter);
-    title->setFont(QFont("arial", 18, 4));
+    QGridLayout* grid_layout = new QGridLayout();
 
-    QLabel* core_version = new QLabel(tr("Core version: %1").arg(Core::instance()->version()), this);
-    QLabel* qt_version_compiled = new QLabel(tr("Compiled with Qt: %1").arg(QT_VERSION_STR));
-    QLabel* qt_version_running = new QLabel(tr("Running with Qt: %1").arg(qVersion()));
-    QLabel* copyright = new QLabel(tr("Copyright &#169; 2014-%1 by Maxim Vasilchuk").arg(QDate::currentDate().year()));
-    copyright->setTextFormat(Qt::RichText);
-    QLabel* email = new QLabel(tr("Email: <a href=\"mailto:mvasilchuk@gmail.com\">mvasilchuk@gmail.com</a>"));
+    QString label_text = tr(
+                   "<table>"
+                   "<tr><th colspan=2 style='font-size: 18pt'>YASEM</th></tr>"
+                   "<tr><td>Core version:</td>                      <td>%1 rev. %2</td></tr>"
+                   "<tr><td>Qt version:</td>                        <td>%3</td></tr>"
 
-    grid_layout->addWidget(title);
-    grid_layout->addWidget(core_version);
-    grid_layout->addWidget(qt_version_compiled);
-    grid_layout->addWidget(qt_version_running);
-    grid_layout->addWidget(copyright);
-    grid_layout->addWidget(email);
+                   "<tr></tr>"
+                   "<tr><td colspan=2>Copyright &#169; 2014-%4 by Maxim Vasilchuk</td></tr>"
+                   "<tr><td>Email:</td>                             <td><a href=\"mailto:mvasilchuk@gmail.com\">mvasilchuk@gmail.com</a></td></tr>"
+
+                   "</table>");
+
+    label_text = label_text
+        .arg(Core::instance()->version())
+        .arg(Core::instance()->revision().toUpper())
+        .arg(qVersion())
+        .arg(QDate::currentDate().year());
+
+
+    QLabel* info_label = new QLabel(label_text, this);
+    info_label->setTextFormat(Qt::RichText);
+
+    grid_layout->addWidget(info_label);
 
     vertical_layout->addLayout(grid_layout);
     vertical_layout->addSpacerItem(new QSpacerItem(20, 80, QSizePolicy::Minimum, QSizePolicy::Expanding));

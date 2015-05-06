@@ -61,11 +61,12 @@ void PluginsDialog::setupGui()
 void PluginsDialog::updateTable()
 {
     pluginsTable->setRowCount(0);
-    pluginsTable->setColumnCount(3);
+    pluginsTable->setColumnCount(4);
 
     pluginsTable->setHorizontalHeaderItem(0, new QTableWidgetItem(tr("Plugin name")));
     pluginsTable->setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Active")));
     pluginsTable->setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Version")));
+    pluginsTable->setHorizontalHeaderItem(3, new QTableWidgetItem(tr("Revision")));
 
     QList<Plugin*> plugins = PluginManager::instance()->getPlugins(ROLE_ANY, false);
     int row_index = 0;
@@ -94,6 +95,11 @@ void PluginsDialog::updateTable()
         versionItem->setFlags(versionItem->flags() ^ Qt::ItemIsEditable);
         versionItem->setTextAlignment(Qt::AlignCenter);
         pluginsTable->setItem(row_index, 2, versionItem);
+
+        QTableWidgetItem *revisionItem = new QTableWidgetItem(plugin->getRevision());
+        revisionItem->setFlags(revisionItem->flags() ^ Qt::ItemIsEditable);
+        revisionItem->setTextAlignment(Qt::AlignCenter);
+        pluginsTable->setItem(row_index, 3, revisionItem);
 
         row_index++;
     }

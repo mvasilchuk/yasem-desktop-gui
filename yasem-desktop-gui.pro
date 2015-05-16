@@ -50,9 +50,6 @@ OTHER_FILES += \
     LICENSE \
     README.md
 
-FORMS    += \
-    settingsdialog.ui
-
 RESOURCES += \
     resources.qrc
 

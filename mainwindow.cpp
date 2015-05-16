@@ -8,7 +8,7 @@
 #include "pluginsdialog.h"
 #include "aboutappdialog.h"
 #include "mediaplayerpluginobject.h"
-
+#include "settingsdialog.h"
 
 #include <QHBoxLayout>
 #include <QStackedLayout>
@@ -23,6 +23,9 @@
 #include <QQuickView>
 #include <QQmlComponent>
 #include <QQmlContext>
+#include <QPalette>
+#include <QStyleFactory>
+#include <QApplication>
 
 using namespace yasem;
 
@@ -34,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreGeometry(settings->value("geometry").toByteArray());
     restoreState(settings->value("window_state").toByteArray());
     settings->endGroup();
+
+    setupPalette();
 
     statusBarPanel = NULL;
     menuBar = NULL;
@@ -246,6 +251,18 @@ void MainWindow::setupMenu()
 
     audioMenu->addMenu(audioTrackMenu);
 
+    // Settings
+
+    QMenu* settingsMenu = new QMenu(tr("Settings"));
+    QAction* settingsAction = new QAction(tr("Settings..."), settingsMenu);
+    connect(settingsAction, &QAction::triggered, [=]() {
+        SettingsDialog* dialog = new SettingsDialog(this);
+        dialog->setAttribute( Qt::WA_DeleteOnClose, true );
+        dialog->show();
+    });
+    settingsMenu->addAction(settingsAction);
+
+
     //About
 
     QMenu* aboutMenu = new QMenu(tr("About"));
@@ -272,6 +289,7 @@ void MainWindow::setupMenu()
     menuBar->addMenu(videoMenu);
     menuBar->addMenu(audioMenu);
     menuBar->addMenu(profilesMenu);
+    menuBar->addMenu(settingsMenu);
     menuBar->addMenu(aboutMenu);
 
     m_menuItems.append(fileMenu);
@@ -416,6 +434,33 @@ bool MainWindow::event(QEvent *event)
     }
 
     return QMainWindow::event(event);
+}
+
+void MainWindow::setupPalette()
+{
+    qDebug() << "Setting up dark palette...";
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+
+    QPalette darkPalette;
+    darkPalette.setColor(QPalette::Window, QColor(53,53,53));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+    darkPalette.setColor(QPalette::Base, QColor(25,25,25));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(53,53,53));
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::Text, Qt::white);
+    darkPalette.setColor(QPalette::Button, QColor(53,53,53));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+
+    qApp->setPalette(darkPalette);
+
+    qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+
 }
 
 void MainWindow::onMousePositionChanged(int position)

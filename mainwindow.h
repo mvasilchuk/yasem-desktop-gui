@@ -21,7 +21,6 @@ class BrowserPluginObject;
 class DatasourcePlugin;
 class GuiPluginObject;
 class MediaPlayerPluginObject;
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -77,6 +76,7 @@ private:
 
 
 public slots:
+    void setupPalette();
     void closeEvent(QCloseEvent *event);
 
     void moveVideo(int left, int top);

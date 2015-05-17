@@ -31,6 +31,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     setObjectName("Settings dialog");
     setupDialog();
 
+    /*
     ConfigTreeGroup* testGroup = new ConfigTreeGroup("test", "test_group", tr("Test group"));
     ConfigItem* testInputText = new ConfigItem("test_key_string", tr("Test string input"), "0", ConfigItem::STRING);
     ConfigItem* testInputBool = new ConfigItem("test_key_bool", tr("Test string bool"), QVariant(false), ConfigItem::BOOL);
@@ -47,7 +48,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     testGroup->addItem(testInputList);
 
 
-    m_settings->getDefaultGroup(YasemSettings::APPEARANCE)->addItem(testGroup);
+    m_settings->getDefaultGroup(YasemSettings::APPEARANCE)->addItem(testGroup);*/
 
     updateConfigGroups();
 }
@@ -227,11 +228,12 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
                 layout->addWidget(label, row_index, 0);
 
                 QComboBox* combo_box = new QComboBox(m_config_items_container);
-                for(const QString& key: item->options().keys())
+                ListConfigItem* list_item = dynamic_cast<ListConfigItem*>(item);
+                for(const QString& title: list_item->options().keys())
                 {
-                    QString title = item->options().value(key).toString();
-                    DEBUG() << "option:" << key << title;
-                    combo_box->addItem(title, key);
+                    QString value = list_item->options().value(title).toString();
+                    DEBUG() << "option:" << title << value;
+                    combo_box->addItem(title, value);
                 }
                 combo_box->setCurrentIndex(combo_box->findData(item->getValue()));
                 combo_box->setProperty(USER_DATA_PROP_KEY, QVariant::fromValue(item));

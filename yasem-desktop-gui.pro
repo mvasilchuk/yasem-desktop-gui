@@ -10,7 +10,7 @@ TEMPLATE = lib
 
 include($${top_srcdir}/common.pri)
 
-QT       += core gui widgets qml quick
+QT       += core gui widgets qml quick opengl
 
 DEFINES += DESKTOPGUI_LIBRARY
 
@@ -20,7 +20,8 @@ SOURCES += desktopgui.cpp \
     pluginsdialog.cpp \
     aboutappdialog.cpp \
     desktopguiobject.cpp \
-    $${CORE_ROOT_DIR}/mediaplayerpluginobject.cpp
+    $${CORE_ROOT_DIR}/mediaplayerpluginobject.cpp \
+    openglwidgetcontainer.cpp
 
 HEADERS +=\
     desktopgui_global.h \
@@ -32,7 +33,8 @@ HEADERS +=\
     $${CORE_ROOT_DIR}/mediaplayerpluginobject.h \
     $${CORE_ROOT_DIR}/browserpluginobject.h \
     desktopguiplugin.h \
-    desktopguiobject.h
+    desktopguiobject.h \
+    openglwidgetcontainer.h
 
 unix {
     target.path = /usr/lib

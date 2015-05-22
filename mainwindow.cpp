@@ -9,6 +9,7 @@
 #include "aboutappdialog.h"
 #include "mediaplayerpluginobject.h"
 #include "settingsdialog.h"
+#include "openglwidgetcontainer.h"
 
 #include <QHBoxLayout>
 #include <QStackedLayout>
@@ -26,6 +27,10 @@
 #include <QPalette>
 #include <QStyleFactory>
 #include <QApplication>
+
+#if QT_VERSION >= 0x050400
+#define USE_OPENGL_RENDER
+#endif
 
 using namespace yasem;
 
@@ -53,12 +58,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::setupGui()
 {
-    QHBoxLayout* main = new QHBoxLayout;
+#ifdef USE_OPENGL_RENDER
+    // Enable OpenGL render
+    OpenGLWidgetContainer* centralWidget = new OpenGLWidgetContainer(this);
+#else
+    QWidget* centralWidget = new QWidget();
+#endif //USE_OPENGL_RENDER
     QStackedLayout* stackedLayout = new QStackedLayout;
 
     if(browser())
     {
-        browser()->setParentWidget(this);
+        browser()->setParentWidget(centralWidget);
         stackedLayout->addWidget(browser()->widget());
     }
     else
@@ -67,17 +77,14 @@ void MainWindow::setupGui()
     if(player() != NULL)
     {
         player()->setAspectRatio(ASPECT_RATIO_AUTO);
-        player()->parent(this);
+        player()->parent(centralWidget);
         stackedLayout->addWidget(player()->widget());
         player()->show();
     }
     else
         WARN() << "No mediplayer plugin found. Media will be disabled!";
 
-    main->addLayout(stackedLayout);
-    QWidget* centralWidget = new QWidget();
-    centralWidget->setLayout(main);
-
+    centralWidget->setLayout(stackedLayout);
     this->setCentralWidget(centralWidget);
 
     if(browser())
@@ -85,7 +92,6 @@ void MainWindow::setupGui()
 
     browser()->widget()->raise();
 
-    //centralWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     setMouseTracking(true);
     if(browser())
         browser()->setupMousePositionHandler(this, SLOT(onMousePositionChanged(int)));

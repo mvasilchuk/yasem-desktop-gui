@@ -27,8 +27,9 @@
 #include <QPalette>
 #include <QStyleFactory>
 #include <QApplication>
+#include <QOpenGLContext>
 
-#if QT_VERSION >= 0x050400
+#if QT_VERSION >= 0x05040
 #define USE_OPENGL_RENDER
 #endif
 
@@ -60,9 +61,19 @@ void MainWindow::setupGui()
 {
 #ifdef USE_OPENGL_RENDER
     // Enable OpenGL render
-    OpenGLWidgetContainer* centralWidget = new OpenGLWidgetContainer(this);
+    QWidget* centralWidget = new OpenGLWidgetContainer();
+    centralWidget->show();
+    QOpenGLWidget* opengl_widget = dynamic_cast<QOpenGLWidget*>(centralWidget);
+    Q_ASSERT(opengl_widget);
+    QPair<int,int> opengl_version = opengl_widget->context()->format().version();
+    if(!opengl_widget->isValid() || opengl_version.first < 2) // Disable OpenGL for virtualbox
+    {
+        WARN() << "Can't instantinate OpenGL widget. Falling back to QWidget";
+        delete centralWidget;
+        centralWidget = new QWidget(this);
+    }
 #else
-    QWidget* centralWidget = new QWidget();
+    QWidget* centralWidget = new QWidget(this);
 #endif //USE_OPENGL_RENDER
     QStackedLayout* stackedLayout = new QStackedLayout;
 

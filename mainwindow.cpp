@@ -59,21 +59,29 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::setupGui()
 {
+    QWidget* centralWidget = NULL;
 #ifdef USE_OPENGL_RENDER
-    // Enable OpenGL render
-    QWidget* centralWidget = new OpenGLWidgetContainer();
-    centralWidget->show();
-    QOpenGLWidget* opengl_widget = dynamic_cast<QOpenGLWidget*>(centralWidget);
-    Q_ASSERT(opengl_widget);
-    QPair<int,int> opengl_version = opengl_widget->context()->format().version();
-    if(!opengl_widget->isValid() || opengl_version.first < 2) // Disable OpenGL for virtualbox
+    if(player() && player()->isInitialized() && player()->isSupportOpenGL())
     {
-        WARN() << "Can't instantinate OpenGL widget. Falling back to QWidget";
-        delete centralWidget;
-        centralWidget = new QWidget(this);
+        // Enable OpenGL render
+        centralWidget = new OpenGLWidgetContainer();
+        centralWidget->show();
+        QOpenGLWidget* opengl_widget = dynamic_cast<QOpenGLWidget*>(centralWidget);
+        Q_ASSERT(opengl_widget);
+        QPair<int,int> opengl_version = opengl_widget->context()->format().version();
+        if(!opengl_widget->isValid() || opengl_version.first < 2) // Disable OpenGL for virtualbox
+        {
+            WARN() << "Can't instantinate OpenGL widget. Falling back to QWidget";
+            delete centralWidget;
+            centralWidget = new QWidget(this);
+        }
     }
+    else
+        centralWidget = new QWidget(this);
+
+
 #else
-    QWidget* centralWidget = new QWidget(this);
+    centralWidget = new QWidget(this);
 #endif //USE_OPENGL_RENDER
     QStackedLayout* stackedLayout = new QStackedLayout;
 
@@ -85,7 +93,7 @@ void MainWindow::setupGui()
     else
         WARN() << "Browser plugin not found! The app may not work correctly!";
 
-    if(player() != NULL)
+    if(player() != NULL && player()->isInitialized())
     {
         player()->setAspectRatio(ASPECT_RATIO_AUTO);
         player()->parent(centralWidget);
@@ -558,7 +566,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings->endGroup();
     settings->sync();
 
-    if(player())
+    if(player() && player()->isInitialized())
         player()->mediaStop();
 
     QMainWindow::closeEvent(event);
@@ -575,7 +583,7 @@ void MainWindow::moveVideo(int left, int top)
 void MainWindow::resizeWebView()
 {
     if(browser()) browser()->resize();
-    if(player())  player()->resize();
+    if(player() && player()->isInitialized())  player()->resize();
 }
 
 void MainWindow::browser(BrowserPluginObject *browserPlugin)

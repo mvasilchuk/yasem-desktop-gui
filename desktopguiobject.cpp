@@ -61,6 +61,8 @@ PluginObjectResult DesktopGuiObject::init()
 {
     ProfileManager::instance()->loadProfiles();
 
+    setInitialized(true);
+
     m_main_window = new MainWindow();
     m_main_window->initialize();
     m_main_window->setAttribute(Qt::WA_QuitOnClose);

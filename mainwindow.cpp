@@ -61,7 +61,7 @@ void MainWindow::setupGui()
 {
     QWidget* centralWidget = NULL;
 #ifdef USE_OPENGL_RENDER
-    if(player() && player()->isInitialized() && player()->isSupportOpenGL())
+    if(player() && player()->isSupportOpenGL())
     {
         // Enable OpenGL render
         centralWidget = new OpenGLWidgetContainer();
@@ -69,6 +69,7 @@ void MainWindow::setupGui()
         QOpenGLWidget* opengl_widget = dynamic_cast<QOpenGLWidget*>(centralWidget);
         Q_ASSERT(opengl_widget);
         QPair<int,int> opengl_version = opengl_widget->context()->format().version();
+        DEBUG() << opengl_version;
         if(!opengl_widget->isValid() || opengl_version.first < 2) // Disable OpenGL for virtualbox
         {
             WARN() << "Can't instantinate OpenGL widget. Falling back to QWidget";
@@ -77,7 +78,10 @@ void MainWindow::setupGui()
         }
     }
     else
+    {
+        DEBUG() << "Player doesn't support OpenGL rendering. Creating a QWidget renderer";
         centralWidget = new QWidget(this);
+    }
 
 
 #else

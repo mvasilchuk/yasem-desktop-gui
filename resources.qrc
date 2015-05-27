@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>MessageWindow.qml</file>
         <file>missing_dependency_line.qml</file>
+        <file>statistics_form.qml</file>
+        <file>res/icons/statistics_icon.png</file>
     </qresource>
 </RCC>

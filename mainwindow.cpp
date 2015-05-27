@@ -10,6 +10,8 @@
 #include "mediaplayerpluginobject.h"
 #include "settingsdialog.h"
 #include "openglwidgetcontainer.h"
+#include "networkstatistics.h"
+#include "statistics.h"
 
 #include <QHBoxLayout>
 #include <QStackedLayout>
@@ -28,6 +30,7 @@
 #include <QStyleFactory>
 #include <QApplication>
 #include <QOpenGLContext>
+#include <QtQuickWidgets>
 
 #if QT_VERSION >= 0x05040
 #define USE_OPENGL_RENDER
@@ -36,7 +39,8 @@
 using namespace yasem;
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent),
+    m_network_statistics(Core::instance()->statistics()->network())
 {
     QSettings* settings = Core::instance()->settings();
     settings->beginGroup("DesktopGui");
@@ -54,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     player(NULL);
     datasource(NULL);
     messageView = NULL;
-    notificationIconBtn = NULL;
+    m_notification_icon = NULL;
 }
 
 void MainWindow::setupGui()
@@ -350,11 +354,27 @@ void MainWindow::setupStatusBar()
         currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
 
-    notificationIconBtn = new QPushButton(statusBar);
-    notificationIconBtn->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
-    notificationIconBtn->setFlat(true);
-    notificationIconBtn->setVisible(false);
-    statusBar->addWidget(notificationIconBtn);
+    m_notification_icon = new QPushButton(statusBar);
+    m_notification_icon->setIcon(QIcon(":/res/icons/statistics_icon.png"));
+    m_notification_icon->setFlat(true);
+    m_notification_icon->setCheckable(true);
+    m_notification_icon->setVisible(true);
+
+    m_statistics_view = new QQuickWidget(this);
+    m_statistics_view->setVisible(false);
+
+    connect(m_notification_icon, &QPushButton::toggled, [=](bool checked){
+        showStatistics(checked);
+    });
+    statusBar->addWidget(m_notification_icon);
+
+    connect(m_network_statistics, &NetworkStatistics::reseted, [=](){
+        //showNotificationIcon(false);
+    });
+    connect(m_network_statistics, &NetworkStatistics::failedCountIncreased, [=](){
+        showNotificationIcon(true);
+    });
+
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *e) {
@@ -379,12 +399,23 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *e)
 
 void MainWindow::setAppFullscreen(bool fullscreen)
 {
+    bool is_statistic_visible = m_statistics_view->isVisible();
     if(fullscreen) {
+        if(is_statistic_visible)
+        {
+            showStatistics(false);
+            m_notification_icon->setChecked(false);
+        }
         this->setWindowState(Qt::WindowFullScreen);
         statusBarPanel->hide();
         menuBar->hide();
 
     } else {
+        if(is_statistic_visible)
+        {
+            showStatistics(false);
+            m_notification_icon->setChecked(false);
+        }
         this->setWindowState(Qt::WindowNoState);
         statusBarPanel->show();
         menuBar->show();
@@ -555,7 +586,47 @@ void MainWindow::checkDependencies()
 
 void MainWindow::showNotificationIcon(bool show)
 {
-    notificationIconBtn->setVisible(show);
+    m_notification_icon->setVisible(show);
+}
+
+void MainWindow::showStatistics(bool show)
+{
+    if(show)
+    {
+        connect(m_network_statistics, &NetworkStatistics::reseted, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &NetworkStatistics::totalCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &NetworkStatistics::successfulCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &NetworkStatistics::failedCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &NetworkStatistics::tooSlowCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &NetworkStatistics::pendingCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
+
+        updateStatistics();
+        m_statistics_view->setSource(QUrl("qrc:/statistics_form.qml"));
+        m_statistics_view->move(QPoint(m_notification_icon->geometry().left(), statusBarPanel->geometry().top() - m_statistics_view->height()));
+        m_statistics_view->show();
+    }
+    else
+    {
+        disconnect(m_network_statistics, &NetworkStatistics::reseted, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &NetworkStatistics::totalCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &NetworkStatistics::successfulCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &NetworkStatistics::failedCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &NetworkStatistics::tooSlowCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &NetworkStatistics::pendingCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
+        m_statistics_view->hide();
+    }
+}
+
+void MainWindow::updateStatistics()
+{
+    QQmlContext* context = m_statistics_view->rootContext();
+    context->setContextProperty("network_total_count", m_network_statistics->totalCount());
+    context->setContextProperty("network_successful_count", m_network_statistics->successfulCount());
+    context->setContextProperty("network_failed_count", m_network_statistics->failedCount());
+    context->setContextProperty("network_slow_count", m_network_statistics->tooSlowConnectionsCount());
+    context->setContextProperty("network_pending_count", m_network_statistics->pendingConnectionsCount());
 }
 
 

@@ -10,7 +10,7 @@ TEMPLATE = lib
 
 include($${top_srcdir}/common.pri)
 
-QT       += core gui widgets qml quick opengl
+QT       += core gui widgets qml quick quickwidgets opengl
 
 DEFINES += DESKTOPGUI_LIBRARY
 
@@ -43,12 +43,6 @@ unix {
 
 OTHER_FILES += \
     metadata.json \
-    res/html/profiles.html \
-    res/css/main.css \
-    res/img/white-highlight.png \
-    res/js/main.js \
-    res/html/profile_config.html \
-    res/js/profile_config.js \
     LICENSE \
     README.md
 

@@ -13,6 +13,7 @@
 #include <QPushButton>
 
 class QQuickView;
+class QQuickWidget;
 
 namespace yasem {
 
@@ -21,6 +22,7 @@ class BrowserPluginObject;
 class DatasourcePlugin;
 class GuiPluginObject;
 class MediaPlayerPluginObject;
+class NetworkStatistics;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -72,7 +74,10 @@ private:
     QLabel* currentProfileStatusBarLabel;
     QLabel* pageLoadingProgressStatusBarLabel;
     QQuickView* messageView;
-    QPushButton* notificationIconBtn;
+    QPushButton* m_notification_icon;
+
+    NetworkStatistics* m_network_statistics;
+    QQuickWidget *m_statistics_view;
 
 
 public slots:
@@ -96,6 +101,8 @@ public slots:
 
     void checkDependencies();
     void showNotificationIcon(bool show);
+    void showStatistics(bool show);
+    void updateStatistics();
 
 };
 

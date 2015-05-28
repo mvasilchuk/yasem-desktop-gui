@@ -441,7 +441,7 @@ void MainWindow::initialize()
     browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 
     if(browser())
-        browser()->createNewPage();
+        browser()->createNewPage(this);
 
     setupGui();
     setupMenu();

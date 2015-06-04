@@ -31,25 +31,6 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     setObjectName("Settings dialog");
     setupDialog();
 
-    /*
-    ConfigTreeGroup* testGroup = new ConfigTreeGroup("test", "test_group", tr("Test group"));
-    ConfigItem* testInputText = new ConfigItem("test_key_string", tr("Test string input"), "0", ConfigItem::STRING);
-    ConfigItem* testInputBool = new ConfigItem("test_key_bool", tr("Test string bool"), QVariant(false), ConfigItem::BOOL);
-    ConfigItem* testInputNumber = new ConfigItem("test_key_number", tr("Test string int"), 0, ConfigItem::INT);
-
-    ConfigItem* testInputList = new ConfigItem("test_key_list", tr("Test string string list"), "", ConfigItem::LIST);
-    testInputList->options().insert("test option 1", "value 1");
-    testInputList->options().insert("test option 2", "value 2");
-    testInputList->options().insert("test option 3", "value 3");
-
-    testGroup->addItem(testInputText);
-    testGroup->addItem(testInputBool);
-    testGroup->addItem(testInputNumber);
-    testGroup->addItem(testInputList);
-
-
-    m_settings->getDefaultGroup(YasemSettings::APPEARANCE)->addItem(testGroup);*/
-
     updateConfigGroups();
 }
 
@@ -135,18 +116,24 @@ QStandardItem *SettingsDialog::addTreeItem(ConfigTreeGroup *group)
 {
     Q_ASSERT(group != NULL);
     QStandardItem* row_item = new QStandardItem(group->getTitle());
-    row_item->setData(QVariant::fromValue(group));
+    ConfigContainerHelper helper;
+    helper.container = group;
+    row_item->setData(QVariant::fromValue(helper));
     DEBUG() << "setData" << QVariant::fromValue(group) << group->getTitle();
     row_item->setEditable(false);
 
     for(ConfigItem* item: group->getItems())
     {
+        DEBUG() << "Subitem" << item << item->getKey() << item->isContainer();
         if(item->isContainer())
         {
             ConfigContainer* container = dynamic_cast<ConfigContainer*>(item);
-            Q_ASSERT(container != NULL);
+            Q_ASSERT(container);
             if(container->getContainerType() == ConfigContainer::CONFIG_GROUP)
-                row_item->appendRow(addTreeItem(static_cast<ConfigTreeGroup*>(container)));
+            {
+                ConfigTreeGroup* tree_group = dynamic_cast<ConfigTreeGroup*>(container);
+                row_item->appendRow(addTreeItem(tree_group));
+            }
         }
     }
     return row_item;
@@ -164,8 +151,7 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
     }
 
     QVariant data = m_tree_view_model->itemFromIndex(index)->data();
-
-    ConfigContainer* container = dynamic_cast<ConfigContainer*>(data.value<QObject*>());
+    ConfigContainer* container = dynamic_cast<ConfigContainer*>(data.value<ConfigContainerHelper>().container);
 
     if(container == NULL)
     {

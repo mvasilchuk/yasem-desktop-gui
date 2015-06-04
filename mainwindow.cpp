@@ -288,6 +288,7 @@ void MainWindow::setupMenu()
 
     QMenu* settingsMenu = new QMenu(tr("Settings"));
     QAction* settingsAction = new QAction(tr("Settings..."), settingsMenu);
+    settingsAction->setMenuRole(QAction::PreferencesRole);
     connect(settingsAction, &QAction::triggered, [=]() {
         SettingsDialog* dialog = new SettingsDialog(this);
         dialog->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -295,12 +296,23 @@ void MainWindow::setupMenu()
     });
     settingsMenu->addAction(settingsAction);
 
+    QAction* toggleFullscreenAction = new QAction(tr("Fullscreen mode"), settingsMenu);
+    toggleFullscreenAction->setCheckable(true);
+    connect(this, &MainWindow::fullScreenModeToggled, [=](bool fullscreen){
+        toggleFullscreenAction->setChecked(fullscreen);
+    });
+    connect(toggleFullscreenAction, &QAction::triggered, [=]() {
+         setAppFullscreen(!isFullScreen());
+    });
+    settingsMenu->addAction(toggleFullscreenAction);
+
 
     //About
 
     QMenu* aboutMenu = new QMenu(tr("About"));
 
     QAction* aboutAppAction = new QAction(tr("About application..."), aboutMenu);
+    aboutAppAction->setMenuRole(QAction::AboutRole);
     connect(aboutAppAction, &QAction::triggered, [=]() {
        AboutAppDialog dialog;
        dialog.exec();
@@ -309,6 +321,7 @@ void MainWindow::setupMenu()
 
 
     QAction* aboutPluginsAction = new QAction(tr("About plugins..."), aboutMenu);
+    aboutPluginsAction->setMenuRole(QAction::ApplicationSpecificRole);
     connect(aboutPluginsAction, &QAction::triggered, [=]() {
        PluginsDialog dialog;
        dialog.exec();
@@ -328,7 +341,8 @@ void MainWindow::setupMenu()
     m_menuItems.append(fileMenu);
     m_menuItems.append(videoMenu);
     m_menuItems.append(audioMenu);
-    m_menuItems.append(profilesMenu);  
+    m_menuItems.append(profilesMenu);
+    m_menuItems.append(settingsMenu);
 }
 
 void MainWindow::setupStatusBar()
@@ -423,6 +437,10 @@ void MainWindow::setAppFullscreen(bool fullscreen)
     if(browser())
         browser()->fullscreen(fullscreen);
     //resizeWebView();
+
+    resizeWebView();
+
+    emit fullScreenModeToggled(isFullScreen());
 }
 
 MainWindow::~MainWindow()

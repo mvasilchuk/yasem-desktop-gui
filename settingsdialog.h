@@ -13,7 +13,13 @@ namespace yasem
 {
 class YasemSettings;
 class ConfigTreeGroup;
+class ConfigContainer;
 class ConfigItem;
+
+struct ConfigContainerHelper {
+    ConfigContainer* container;
+};
+
 class SettingsDialog : public QDialog
 {
     Q_OBJECT
@@ -52,5 +58,7 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(yasem::ConfigContainerHelper)
 
 #endif // SETTINGSDIALOG_H

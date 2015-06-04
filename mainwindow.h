@@ -104,6 +104,9 @@ public slots:
     void showStatistics(bool show);
     void updateStatistics();
 
+signals:
+    void fullScreenModeToggled(bool fullscreen);
+
 };
 
 }

@@ -96,7 +96,8 @@ void MainWindow::setupGui()
     if(browser())
     {
         browser()->setParentWidget(centralWidget);
-        stackedLayout->addWidget(browser()->widget());
+        AbstractWebPage* page = browser()->createNewPage();
+        stackedLayout->addWidget(page->widget());
     }
     else
         WARN() << "Browser plugin not found! The app may not work correctly!";
@@ -457,9 +458,6 @@ void MainWindow::initialize()
     player(dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA)));
     gui(dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI)));
     browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
-
-    if(browser())
-        browser()->createNewPage(this);
 
     setupGui();
     setupMenu();

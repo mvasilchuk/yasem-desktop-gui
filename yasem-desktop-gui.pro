@@ -34,7 +34,9 @@ HEADERS +=\
     $${CORE_ROOT_DIR}/browserpluginobject.h \
     desktopguiplugin.h \
     desktopguiobject.h \
-    openglwidgetcontainer.h
+    openglwidgetcontainer.h \
+    $${CORE_ROOT_DIR}/datasourceplugin.h \
+    $${CORE_ROOT_DIR}/guipluginobject.h
 
 unix {
     target.path = /usr/lib

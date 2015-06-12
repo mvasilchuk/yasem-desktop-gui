@@ -454,10 +454,10 @@ void MainWindow::initialize()
 {
     DEBUG() << "MainWindow::initialize()";
 
-    datasource(dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(ROLE_DATASOURCE)));
-    player(dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA)));
-    gui(dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI)));
-    browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
+    datasource(__get_plugin<DatasourcePlugin*>(ROLE_DATASOURCE));
+    player(__get_plugin<MediaPlayerPluginObject*>(ROLE_MEDIA));
+    gui(__get_plugin<GuiPluginObject*>(ROLE_GUI));
+    browser(__get_plugin<BrowserPluginObject*>(ROLE_BROWSER));
 
     setupGui();
     setupMenu();

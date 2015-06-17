@@ -32,7 +32,7 @@
 #include <QOpenGLContext>
 #include <QtQuickWidgets>
 
-#if QT_VERSION >= 0x05040
+#if (QT_VERSION >= 0x05040)
 #define USE_OPENGL_RENDER
 #endif
 
@@ -42,6 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_network_statistics(Core::instance()->statistics()->network())
 {
+    m_statistics_view = NULL;
+
     QSettings* settings = Core::instance()->settings();
     settings->beginGroup("DesktopGui");
     restoreGeometry(settings->value("geometry").toByteArray());
@@ -65,7 +67,7 @@ void MainWindow::setupGui()
 {
     QWidget* centralWidget = NULL;
 #ifdef USE_OPENGL_RENDER
-    if(player() && player()->isSupportOpenGL())
+    if(player() && player()->isSupportOpenGL() && Core::instance()->getVM() == Core::VM_NONE)
     {
         // Enable OpenGL render
         centralWidget = new OpenGLWidgetContainer();
@@ -369,27 +371,45 @@ void MainWindow::setupStatusBar()
         currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
 
-    m_notification_icon = new QPushButton(statusBar);
-    m_notification_icon->setIcon(QIcon(":/res/icons/statistics_icon.png"));
-    m_notification_icon->setFlat(true);
-    m_notification_icon->setCheckable(true);
-    m_notification_icon->setVisible(true);
+    if( Core::instance()->getVM() == Core::VM_NONE)
+    {
+        m_notification_icon = new QPushButton(statusBar);
+        m_notification_icon->setIcon(QIcon(":/res/icons/statistics_icon.png"));
+        m_notification_icon->setFlat(true);
+        m_notification_icon->setCheckable(true);
+        m_notification_icon->setVisible(true);
 
-    m_statistics_view = new QQuickWidget(this);
-    m_statistics_view->setVisible(false);
+        m_statistics_view = new QQuickWidget();
 
-    connect(m_notification_icon, &QPushButton::toggled, [=](bool checked){
-        showStatistics(checked);
-    });
-    statusBar->addWidget(m_notification_icon);
+        QPair<int,int> opengl_version = m_statistics_view->format().version();
+        DEBUG() << opengl_version;
+        if(opengl_version.first < 2) // Disable OpenGL for virtualbox
+        {
+            WARN() << "Can't create QQuickWidget for statistics! Is it VirtualBox?";
+            delete m_statistics_view;
+        }
+        else
+        {
+            m_statistics_view->setParent(this);
+            m_statistics_view->setVisible(false);
+        }
 
-    connect(m_network_statistics, &NetworkStatistics::reseted, [=](){
-        //showNotificationIcon(false);
-    });
-    connect(m_network_statistics, &NetworkStatistics::failedCountIncreased, [=](){
-        showNotificationIcon(true);
-    });
+        connect(m_notification_icon, &QPushButton::toggled, [=](bool checked){
+            showStatistics(checked);
+        });
+        statusBar->addWidget(m_notification_icon);
 
+        connect(m_network_statistics, &NetworkStatistics::reseted, [=](){
+            //showNotificationIcon(false);
+        });
+        connect(m_network_statistics, &NetworkStatistics::failedCountIncreased, [=](){
+            showNotificationIcon(true);
+        });
+    }
+    else
+    {
+        LOG() << "Statistics widget will be disabled, because it doesn't work on virtual machines.";
+    }
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *e) {
@@ -414,7 +434,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *e)
 
 void MainWindow::setAppFullscreen(bool fullscreen)
 {
-    bool is_statistic_visible = m_statistics_view->isVisible();
+    bool is_statistic_visible = m_statistics_view != NULL ? m_statistics_view->isVisible() : false;
     if(fullscreen) {
         if(is_statistic_visible)
         {
@@ -618,9 +638,13 @@ void MainWindow::showStatistics(bool show)
         connect(m_network_statistics, &NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
 
         updateStatistics();
-        m_statistics_view->setSource(QUrl("qrc:/statistics_form.qml"));
-        m_statistics_view->move(QPoint(m_notification_icon->geometry().left(), statusBarPanel->geometry().top() - m_statistics_view->height()));
-        m_statistics_view->show();
+        if(m_statistics_view != NULL)
+        {
+            m_statistics_view->setSource(QUrl("qrc:/statistics_form.qml"));
+            m_statistics_view->move(QPoint(m_notification_icon->geometry().left(), statusBarPanel->geometry().top() - m_statistics_view->height()));
+            m_statistics_view->show();
+        }
+
     }
     else
     {
@@ -631,7 +655,10 @@ void MainWindow::showStatistics(bool show)
         disconnect(m_network_statistics, &NetworkStatistics::tooSlowCountIncreased, this, &MainWindow::updateStatistics);
         disconnect(m_network_statistics, &NetworkStatistics::pendingCountIncreased, this, &MainWindow::updateStatistics);
         disconnect(m_network_statistics, &NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
-        m_statistics_view->hide();
+        if(m_statistics_view != NULL)
+        {
+            m_statistics_view->hide();
+        }
     }
 }
 

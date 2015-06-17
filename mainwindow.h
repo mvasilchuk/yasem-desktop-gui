@@ -29,8 +29,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
-
-
     void resizeEvent(QResizeEvent *event);
 
     void initialize();
@@ -78,7 +76,6 @@ private:
 
     NetworkStatistics* m_network_statistics;
     QQuickWidget *m_statistics_view;
-
 
 public slots:
     void setupPalette();

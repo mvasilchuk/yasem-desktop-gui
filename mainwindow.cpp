@@ -75,7 +75,6 @@ void MainWindow::setupGui()
         QOpenGLWidget* opengl_widget = dynamic_cast<QOpenGLWidget*>(centralWidget);
         Q_ASSERT(opengl_widget);
         QPair<int,int> opengl_version = opengl_widget->context()->format().version();
-        DEBUG() << opengl_version;
         if(!opengl_widget->isValid() || opengl_version.first < 2) // Disable OpenGL for virtualbox
         {
             WARN() << "Can't instantinate OpenGL widget. Falling back to QWidget";

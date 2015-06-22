@@ -7,6 +7,7 @@ DesktopGuiPlugin::DesktopGuiPlugin(QObject *parent):
     Plugin(parent)
 {
     setObjectName("DesktopGUI");
+    setMultithreading(false);
 }
 
 DesktopGuiPlugin::~DesktopGuiPlugin()

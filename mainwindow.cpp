@@ -12,6 +12,8 @@
 #include "openglwidgetcontainer.h"
 #include "networkstatistics.h"
 #include "statistics.h"
+#include "yasemsettings.h"
+#include "configuration_items.h"
 
 #include <QHBoxLayout>
 #include <QStackedLayout>
@@ -40,7 +42,9 @@ using namespace yasem;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_network_statistics(Core::instance()->statistics()->network())
+    m_network_statistics(Core::instance()->statistics()->network()),
+    m_network_statistics_enabled(true),
+    m_opengl_enabled(Core::instance()->getVM() == Core::VM_NONE)
 {
     m_statistics_view = NULL;
 
@@ -61,13 +65,19 @@ MainWindow::MainWindow(QWidget *parent) :
     datasource(NULL);
     messageView = NULL;
     m_notification_icon = NULL;
+    m_network_statistics_enabled = Core::instance()->yasem_settings()->findItem(
+                QStringList()
+                    << SETTINGS_GROUP_OTHER
+                    << NETWORK_STATISTICS
+                    << NETWORK_STATISTICS_ENABLED)
+            ->value().toBool();
 }
 
 void MainWindow::setupGui()
 {
     QWidget* centralWidget = NULL;
 #ifdef USE_OPENGL_RENDER
-    if(player() && player()->isSupportOpenGL() && Core::instance()->getVM() == Core::VM_NONE)
+    if(player() && player()->isSupportOpenGL() && m_opengl_enabled)
     {
         // Enable OpenGL render
         centralWidget = new OpenGLWidgetContainer();
@@ -370,7 +380,9 @@ void MainWindow::setupStatusBar()
         currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
 
-    if( Core::instance()->getVM() == Core::VM_NONE)
+    // Disable network statistics for virtual machines, because OpenGL is not supported there correctly yet
+    // (at least on VirtualBox)
+    if(m_network_statistics_enabled && m_opengl_enabled)
     {
         m_notification_icon = new QPushButton(statusBar);
         m_notification_icon->setIcon(QIcon(":/res/icons/statistics_icon.png"));

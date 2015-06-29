@@ -74,10 +74,11 @@ private:
     QQuickView* messageView;
     QPushButton* m_notification_icon;
 
-    bool m_opengl_enabled;
-    bool m_network_statistics_enabled;
 
     NetworkStatistics* m_network_statistics;
+    bool m_network_statistics_enabled;
+    bool m_opengl_enabled;
+
     QQuickWidget *m_statistics_view;
 
 public slots:

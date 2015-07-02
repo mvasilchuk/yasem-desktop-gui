@@ -14,6 +14,8 @@
 #include "statistics.h"
 #include "yasemsettings.h"
 #include "configuration_items.h"
+#include "abstractwebpage.h"
+#include "datasourceplugin.h"
 
 #include <QHBoxLayout>
 #include <QStackedLayout>

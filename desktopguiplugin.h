@@ -4,6 +4,7 @@
 #include "desktopgui_global.h"
 #include "guipluginobject.h"
 #include "plugin.h"
+#include <QMetaClassInfo>
 
 class QMenu;
 
@@ -17,7 +18,9 @@ class DESKTOPGUISHARED_EXPORT DesktopGuiPlugin: public Plugin
     Q_INTERFACES(yasem::Plugin)
 
     Q_CLASSINFO("author", "Maxim Vasilchuk")
-    Q_CLASSINFO("description", "Desktop GUI for YASEM")
+    Q_CLASSINFO("description", "Desktop GUI")
+    Q_CLASSINFO("version", MODULE_VERSION)
+    Q_CLASSINFO("revision", GIT_VERSION)
 public:
     explicit DesktopGuiPlugin(QObject* parent = 0);
     virtual ~DesktopGuiPlugin();

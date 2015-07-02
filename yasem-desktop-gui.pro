@@ -20,23 +20,17 @@ SOURCES += desktopgui.cpp \
     pluginsdialog.cpp \
     aboutappdialog.cpp \
     desktopguiobject.cpp \
-    $${CORE_ROOT_DIR}/mediaplayerpluginobject.cpp \
     openglwidgetcontainer.cpp
 
 HEADERS +=\
     desktopgui_global.h \
     mainwindow.h \
     settingsdialog.h  \
-    $${CORE_ROOT_DIR}/profilemanager.h \
     pluginsdialog.h \
     aboutappdialog.h \
-    $${CORE_ROOT_DIR}/mediaplayerpluginobject.h \
-    $${CORE_ROOT_DIR}/browserpluginobject.h \
     desktopguiplugin.h \
     desktopguiobject.h \
-    openglwidgetcontainer.h \
-    $${CORE_ROOT_DIR}/datasourceplugin.h \
-    $${CORE_ROOT_DIR}/guipluginobject.h
+    openglwidgetcontainer.h
 
 unix {
     target.path = /usr/lib

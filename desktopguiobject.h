@@ -8,13 +8,16 @@
 namespace yasem {
 
 class MainWindow;
+
+namespace SDK {
 class Profile;
 class Plugin;
+}
 
-class DesktopGuiObject: public GuiPluginObject
+class DesktopGuiObject: public SDK::GuiPluginObject
 {
 public:
-    DesktopGuiObject(Plugin* plugin);
+    DesktopGuiObject(SDK::Plugin* plugin);
     virtual ~DesktopGuiObject();
 
     // GuiPlugin interface
@@ -30,12 +33,12 @@ public:
 protected:
     MainWindow* m_main_window;
     bool m_fullscreen;
-    Profile* m_config_profile;
+    SDK::Profile* m_config_profile;
 
     // AbstractPluginObject interface
 public:
-    PluginObjectResult init();
-    PluginObjectResult deinit();
+    SDK::PluginObjectResult init();
+    SDK::PluginObjectResult deinit();
 };
 
 }

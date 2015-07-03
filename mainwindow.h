@@ -17,12 +17,15 @@ class QQuickWidget;
 
 namespace yasem {
 
+namespace SDK {
 class DesktopGuiPlugin;
 class BrowserPluginObject;
 class DatasourcePlugin;
 class GuiPluginObject;
 class MediaPlayerPluginObject;
 class NetworkStatistics;
+}
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -33,17 +36,17 @@ public:
 
     void initialize();
 
-    virtual void browser(BrowserPluginObject* browserPlugin);
-    virtual BrowserPluginObject* browser();
+    virtual void browser(SDK::BrowserPluginObject* browserPlugin);
+    virtual SDK::BrowserPluginObject* browser();
 
-    virtual void datasource(DatasourcePlugin* datasourcePlugin);
-    virtual DatasourcePlugin* datasource();
+    virtual void datasource(SDK::DatasourcePlugin* datasourcePlugin);
+    virtual SDK::DatasourcePlugin* datasource();
 
-    virtual void gui(GuiPluginObject* guiPlugin);
-    virtual GuiPluginObject* gui();
+    virtual void gui(SDK::GuiPluginObject* guiPlugin);
+    virtual SDK::GuiPluginObject* gui();
 
-    virtual void player(MediaPlayerPluginObject* playerPlugin);
-    virtual MediaPlayerPluginObject* player();
+    virtual void player(SDK::MediaPlayerPluginObject* playerPlugin);
+    virtual SDK::MediaPlayerPluginObject* player();
 
      QList<QMenu*> getMenuItems();
      QRect windowInternalRect();
@@ -52,7 +55,7 @@ protected:
     void changeEvent(QEvent *e);
     bool event(QEvent *event);
 
-    DesktopGuiPlugin* desktopGui;
+    SDK::DesktopGuiPlugin* desktopGui;
     QList<QMenu*> m_menuItems;
 
 private:
@@ -60,10 +63,10 @@ private:
     QToolBar* statusBarPanel;
     QStatusBar *statusBar;
 
-    BrowserPluginObject* browserPlugin;
-    DatasourcePlugin *datasourcePlugin;
-    GuiPluginObject* guiPlugin;
-    MediaPlayerPluginObject* playerPlugin;
+    SDK::BrowserPluginObject* browserPlugin;
+    SDK::DatasourcePlugin *datasourcePlugin;
+    SDK::GuiPluginObject* guiPlugin;
+    SDK::MediaPlayerPluginObject* playerPlugin;
 
     QScrollArea* errorScrollArea;
     QGroupBox* errorGroupBox;
@@ -75,7 +78,7 @@ private:
     QPushButton* m_notification_icon;
 
 
-    NetworkStatistics* m_network_statistics;
+    SDK::NetworkStatistics* m_network_statistics;
     bool m_network_statistics_enabled;
     bool m_opengl_enabled;
 

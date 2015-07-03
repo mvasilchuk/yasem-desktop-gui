@@ -45,8 +45,8 @@ void AboutAppDialog::setupGui()
                    "</table>");
 
     label_text = label_text
-        .arg(Core::instance()->version())
-        .arg(Core::instance()->revision().toUpper())
+        .arg(SDK::Core::instance()->version())
+        .arg(SDK::Core::instance()->revision().toUpper())
         .arg(qVersion())
         .arg(QDate::currentDate().year());
 

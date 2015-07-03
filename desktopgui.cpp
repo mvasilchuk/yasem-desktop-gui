@@ -4,7 +4,7 @@
 using namespace yasem;
 
 DesktopGuiPlugin::DesktopGuiPlugin(QObject *parent):
-    Plugin(parent)
+    SDK::Plugin(parent)
 {
     setObjectName("DesktopGUI");
     setMultithreading(false);
@@ -17,14 +17,14 @@ DesktopGuiPlugin::~DesktopGuiPlugin()
 
 void DesktopGuiPlugin::register_dependencies()
 {
-    add_dependency(PluginDependency(ROLE_WEB_SERVER, false));
-    add_dependency(PluginDependency(ROLE_BROWSER, true, true));
-    add_dependency(PluginDependency(ROLE_WEB_GUI, true, true));
-    add_dependency(PluginDependency(ROLE_DATASOURCE, true, true));
-    add_dependency(PluginDependency(ROLE_MEDIA, true, true));
+    add_dependency(SDK::PluginDependency(SDK::ROLE_WEB_SERVER, false));
+    add_dependency(SDK::PluginDependency(SDK::ROLE_BROWSER, true, true));
+    add_dependency(SDK::PluginDependency(SDK::ROLE_WEB_GUI, true, true));
+    add_dependency(SDK::PluginDependency(SDK::ROLE_DATASOURCE, true, true));
+    add_dependency(SDK::PluginDependency(SDK::ROLE_MEDIA, true, true));
 }
 
 void DesktopGuiPlugin::register_roles()
 {
-    register_role(ROLE_GUI, new DesktopGuiObject(this));
+    register_role(SDK::ROLE_GUI, new DesktopGuiObject(this));
 }

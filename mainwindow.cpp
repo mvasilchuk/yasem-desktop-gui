@@ -44,13 +44,13 @@ using namespace yasem;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_network_statistics(Core::instance()->statistics()->network()),
+    m_network_statistics(SDK::Core::instance()->statistics()->network()),
     m_network_statistics_enabled(true),
-    m_opengl_enabled(Core::instance()->getVM() == Core::VM_NONE)
+    m_opengl_enabled(SDK::Core::instance()->getVM() == SDK::Core::VM_NONE)
 {
     m_statistics_view = NULL;
 
-    QSettings* settings = Core::instance()->settings();
+    QSettings* settings = SDK::Core::instance()->settings();
     settings->beginGroup("DesktopGui");
     restoreGeometry(settings->value("geometry").toByteArray());
     restoreState(settings->value("window_state").toByteArray());
@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     datasource(NULL);
     messageView = NULL;
     m_notification_icon = NULL;
-    m_network_statistics_enabled = Core::instance()->yasem_settings()->findItem(
+    m_network_statistics_enabled = SDK::Core::instance()->yasem_settings()->findItem(
                 QStringList()
                     << SETTINGS_GROUP_OTHER
                     << NETWORK_STATISTICS
@@ -82,8 +82,7 @@ void MainWindow::setupGui()
     if(player() && player()->isSupportOpenGL() && m_opengl_enabled)
     {
         // Enable OpenGL render
-        centralWidget = new OpenGLWidgetContainer();
-        centralWidget->show();
+        centralWidget = new OpenGLWidgetContainer;
         QOpenGLWidget* opengl_widget = dynamic_cast<QOpenGLWidget*>(centralWidget);
         Q_ASSERT(opengl_widget);
         QPair<int,int> opengl_version = opengl_widget->context()->format().version();
@@ -100,7 +99,6 @@ void MainWindow::setupGui()
         centralWidget = new QWidget(this);
     }
 
-
 #else
     centralWidget = new QWidget(this);
 #endif //USE_OPENGL_RENDER
@@ -109,7 +107,7 @@ void MainWindow::setupGui()
     if(browser())
     {
         browser()->setParentWidget(centralWidget);
-        AbstractWebPage* page = browser()->createNewPage();
+        SDK::AbstractWebPage* page = browser()->createNewPage();
         stackedLayout->addWidget(page->widget());
     }
     else
@@ -117,7 +115,7 @@ void MainWindow::setupGui()
 
     if(player() != NULL && player()->isInitialized())
     {
-        player()->setAspectRatio(ASPECT_RATIO_AUTO);
+        player()->setAspectRatio(SDK::ASPECT_RATIO_AUTO);
         player()->parent(centralWidget);
         stackedLayout->addWidget(player()->widget());
         player()->show();
@@ -129,7 +127,7 @@ void MainWindow::setupGui()
     this->setCentralWidget(centralWidget);
 
     if(browser())
-        browser()->setTopWidget(BrowserPluginObject::TOP_WIDGET_BROWSER);
+        browser()->setTopWidget(SDK::BrowserPluginObject::TOP_WIDGET_BROWSER);
 
     browser()->widget()->raise();
 
@@ -159,21 +157,21 @@ void MainWindow::setupMenu()
 
     QAction *backToMainPage = new QAction(tr("Back to main page"), this);
     connect(backToMainPage, &QAction::triggered, []() {
-        ProfileManager::instance()->backToMainPage();
+        SDK::ProfileManager::instance()->backToMainPage();
     });
 
     profilesMenu->addAction(backToMainPage);
     profilesMenu->addSection(tr("Profiles"));
 
     connect(profilesMenu, &QMenu::triggered, [=](QAction* action) {
-        Profile* profile = ProfileManager::instance()->findById(action->data().toString());
+        SDK::Profile* profile = SDK::ProfileManager::instance()->findById(action->data().toString());
         if(profile != NULL)
-            ProfileManager::instance()->setActiveProfile(profile);
+            SDK::ProfileManager::instance()->setActiveProfile(profile);
         else
             WARN() << qPrintable(QString("Can't load profile %1 from profiles menu!").arg(action->data().toString()));
     });
 
-    connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile){
+    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](SDK::Profile* profile){
         for(QAction* action: profilesMenu->actions())
         {
             if(action->data().toString() == profile->getId())
@@ -188,9 +186,9 @@ void MainWindow::setupMenu()
         }
     });
 
-    for(Profile* profile: ProfileManager::instance()->getProfiles())
+    for(SDK::Profile* profile: SDK::ProfileManager::instance()->getProfiles())
     {
-        if(!profile->hasFlag(Profile::HIDDEN))
+        if(!profile->hasFlag(SDK::Profile::HIDDEN))
         {
             QAction* loadProfile = new QAction(profile->getName(), profilesMenu);
             loadProfile->setData(profile->getId());
@@ -207,7 +205,7 @@ void MainWindow::setupMenu()
 
     connect(aspectRatioMenu, &QMenu::triggered, [=](QAction* action){
         if(player())
-            player()->setAspectRatio((AspectRatio) action->data().toInt());
+            player()->setAspectRatio((SDK::AspectRatio) action->data().toInt());
         aspectRatioMenu->setActiveAction(action);
         for(QAction* a: aspectRatioMenu->actions())
         {
@@ -220,10 +218,10 @@ void MainWindow::setupMenu()
         if(!player())
             return;
 
-        AspectRatio current_ratio = player()->getAspectRatio();
+        SDK::AspectRatio current_ratio = player()->getAspectRatio();
         for(QAction* action: aspectRatioMenu->actions())
         {
-            AspectRatio ratio = (AspectRatio) action->data().toInt();
+            SDK::AspectRatio ratio = (SDK::AspectRatio) action->data().toInt();
             if(ratio == current_ratio)
             {
                 aspectRatioMenu->setActiveAction(action);
@@ -237,23 +235,23 @@ void MainWindow::setupMenu()
         }
     });
 
-    QList<QPair<QString, AspectRatio>> ratios;
-    ratios.append(QPair<QString, AspectRatio>(tr("Auto"),     ASPECT_RATIO_AUTO));
-    ratios.append(QPair<QString, AspectRatio>(tr("1:1"),      ASPECT_RATIO_1_1));
-    ratios.append(QPair<QString, AspectRatio>(tr("5:4"),      ASPECT_RATIO_5_4));
-    ratios.append(QPair<QString, AspectRatio>(tr("4:3"),      ASPECT_RATIO_4_3));
-    ratios.append(QPair<QString, AspectRatio>(tr("11:8"),     ASPECT_RATIO_11_8));
-    ratios.append(QPair<QString, AspectRatio>(tr("14:10"),    ASPECT_RATIO_14_10));
-    ratios.append(QPair<QString, AspectRatio>(tr("3:2"),      ASPECT_RATIO_3_2));
-    ratios.append(QPair<QString, AspectRatio>(tr("14:9"),     ASPECT_RATIO_14_9));
-    ratios.append(QPair<QString, AspectRatio>(tr("16:10"),    ASPECT_RATIO_16_10));
-    ratios.append(QPair<QString, AspectRatio>(tr("16:9"),     ASPECT_RATIO_16_9));
-    ratios.append(QPair<QString, AspectRatio>(tr("2.35:1"),  ASPECT_RATIO_2_35_1));
+    QList<QPair<QString, SDK::AspectRatio>> ratios;
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("Auto"),     SDK::ASPECT_RATIO_AUTO));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("1:1"),      SDK::ASPECT_RATIO_1_1));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("5:4"),      SDK::ASPECT_RATIO_5_4));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("4:3"),      SDK::ASPECT_RATIO_4_3));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("11:8"),     SDK::ASPECT_RATIO_11_8));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("14:10"),    SDK::ASPECT_RATIO_14_10));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("3:2"),      SDK::ASPECT_RATIO_3_2));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("14:9"),     SDK::ASPECT_RATIO_14_9));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("16:10"),    SDK::ASPECT_RATIO_16_10));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("16:9"),     SDK::ASPECT_RATIO_16_9));
+    ratios.append(QPair<QString, SDK::AspectRatio>(tr("2.35:1"),   SDK::ASPECT_RATIO_2_35_1));
 
-    for(QPair<QString, AspectRatio> pair: ratios)
+    for(QPair<QString, SDK::AspectRatio> pair: ratios)
     {
         QString name = pair.first;
-        AspectRatio ratio = pair.second;
+        SDK::AspectRatio ratio = pair.second;
         QAction* action = new QAction(name, aspectRatioMenu);
         action->setData(ratio);
         action->setCheckable(true);
@@ -378,7 +376,7 @@ void MainWindow::setupStatusBar()
 
     this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
 
-    connect(ProfileManager::instance(), &ProfileManager::profileChanged, [=](Profile* profile) {
+    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](SDK::Profile* profile) {
         currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
 
@@ -412,10 +410,10 @@ void MainWindow::setupStatusBar()
         });
         statusBar->addWidget(m_notification_icon);
 
-        connect(m_network_statistics, &NetworkStatistics::reseted, [=](){
+        connect(m_network_statistics, &SDK::NetworkStatistics::reseted, [=](){
             //showNotificationIcon(false);
         });
-        connect(m_network_statistics, &NetworkStatistics::failedCountIncreased, [=](){
+        connect(m_network_statistics, &SDK::NetworkStatistics::failedCountIncreased, [=](){
             showNotificationIcon(true);
         });
     }
@@ -487,25 +485,25 @@ void MainWindow::initialize()
 {
     DEBUG() << "MainWindow::initialize()";
 
-    datasource(__get_plugin<DatasourcePlugin*>(ROLE_DATASOURCE));
-    player(__get_plugin<MediaPlayerPluginObject*>(ROLE_MEDIA));
-    gui(__get_plugin<GuiPluginObject*>(ROLE_GUI));
-    browser(__get_plugin<BrowserPluginObject*>(ROLE_BROWSER));
+    datasource(__get_plugin<SDK::DatasourcePlugin*>(SDK::ROLE_DATASOURCE));
+    player(__get_plugin<SDK::MediaPlayerPluginObject*>(SDK::ROLE_MEDIA));
+    gui(__get_plugin<SDK::GuiPluginObject*>(SDK::ROLE_GUI));
+    browser(__get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER));
 
     setupGui();
     setupMenu();
     setupStatusBar();
 
-    if(QCoreApplication::arguments().contains(arguments[FULLSCREEN_APP]))
+    if(QCoreApplication::arguments().contains(SDK::arguments[SDK::FULLSCREEN_APP]))
     {
         setAppFullscreen(true);
     }
 
     QString configProfileSubmoduleId = "web-gui-config";
 
-    Profile* profile = ProfileManager::instance()->findById(configProfileSubmoduleId);
+    SDK::Profile* profile = SDK::ProfileManager::instance()->findById(configProfileSubmoduleId);
     if(profile != NULL)
-        ProfileManager::instance()->setActiveProfile(profile);
+        SDK::ProfileManager::instance()->setActiveProfile(profile);
     else
         WARN() << qPrintable(QString("Can't load Web GUI configuration profile"));
 }
@@ -577,7 +575,7 @@ void MainWindow::onMousePositionChanged(int position)
 
     if(isFullScreen())
     {
-        bool bottom = (position & MOUSE_POSITION::BOTTOM) == MOUSE_POSITION::BOTTOM;
+        bool bottom = (position & SDK::MOUSE_POSITION::BOTTOM) == SDK::MOUSE_POSITION::BOTTOM;
 
         if(bottom && !statusBar->isVisible())
         {
@@ -604,10 +602,10 @@ void MainWindow::checkDependencies()
 {
     QStringList lines;
 
-    for(Plugin* plugin: PluginManager::instance()->getPlugins(ROLE_ANY, false))
+    for(SDK::Plugin* plugin: SDK::PluginManager::instance()->getPlugins(SDK::ROLE_ANY, false))
     {
         QStringList list;
-        for(PluginDependency dependency: plugin->dependencies())
+        for(SDK::PluginDependency dependency: plugin->dependencies())
         {
             if(dependency.isRequired())
             {
@@ -642,13 +640,13 @@ void MainWindow::showStatistics(bool show)
 {
     if(show)
     {
-        connect(m_network_statistics, &NetworkStatistics::reseted, this, &MainWindow::updateStatistics);
-        connect(m_network_statistics, &NetworkStatistics::totalCountIncreased, this, &MainWindow::updateStatistics);
-        connect(m_network_statistics, &NetworkStatistics::successfulCountIncreased, this, &MainWindow::updateStatistics);
-        connect(m_network_statistics, &NetworkStatistics::failedCountIncreased, this, &MainWindow::updateStatistics);
-        connect(m_network_statistics, &NetworkStatistics::tooSlowCountIncreased, this, &MainWindow::updateStatistics);
-        connect(m_network_statistics, &NetworkStatistics::pendingCountIncreased, this, &MainWindow::updateStatistics);
-        connect(m_network_statistics, &NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &SDK::NetworkStatistics::reseted, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &SDK::NetworkStatistics::totalCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &SDK::NetworkStatistics::successfulCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &SDK::NetworkStatistics::failedCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &SDK::NetworkStatistics::tooSlowCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &SDK::NetworkStatistics::pendingCountIncreased, this, &MainWindow::updateStatistics);
+        connect(m_network_statistics, &SDK::NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
 
         updateStatistics();
         if(m_statistics_view != NULL)
@@ -661,13 +659,13 @@ void MainWindow::showStatistics(bool show)
     }
     else
     {
-        disconnect(m_network_statistics, &NetworkStatistics::reseted, this, &MainWindow::updateStatistics);
-        disconnect(m_network_statistics, &NetworkStatistics::totalCountIncreased, this, &MainWindow::updateStatistics);
-        disconnect(m_network_statistics, &NetworkStatistics::successfulCountIncreased, this, &MainWindow::updateStatistics);
-        disconnect(m_network_statistics, &NetworkStatistics::failedCountIncreased, this, &MainWindow::updateStatistics);
-        disconnect(m_network_statistics, &NetworkStatistics::tooSlowCountIncreased, this, &MainWindow::updateStatistics);
-        disconnect(m_network_statistics, &NetworkStatistics::pendingCountIncreased, this, &MainWindow::updateStatistics);
-        disconnect(m_network_statistics, &NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &SDK::NetworkStatistics::reseted, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &SDK::NetworkStatistics::totalCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &SDK::NetworkStatistics::successfulCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &SDK::NetworkStatistics::failedCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &SDK::NetworkStatistics::tooSlowCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &SDK::NetworkStatistics::pendingCountIncreased, this, &MainWindow::updateStatistics);
+        disconnect(m_network_statistics, &SDK::NetworkStatistics::pendingCountDecreased, this, &MainWindow::updateStatistics);
         if(m_statistics_view != NULL)
         {
             m_statistics_view->hide();
@@ -690,7 +688,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     DEBUG() << "CLOSE EVENT!!!!";
 
-    QSettings* settings = Core::instance()->settings();
+    QSettings* settings = SDK::Core::instance()->settings();
     settings->beginGroup("DesktopGui");
     settings->setValue("geometry", saveGeometry());
     settings->setValue("window_state", saveState());
@@ -717,42 +715,42 @@ void MainWindow::resizeWebView()
     if(player() && player()->isInitialized())  player()->resize();
 }
 
-void MainWindow::browser(BrowserPluginObject *browserPlugin)
+void MainWindow::browser(SDK::BrowserPluginObject *browserPlugin)
 {
     this->browserPlugin = browserPlugin;
 }
 
-BrowserPluginObject *MainWindow::browser()
+SDK::BrowserPluginObject *MainWindow::browser()
 {
     return this->browserPlugin;
 }
 
-void MainWindow::datasource(DatasourcePlugin *datasourcePlugin)
+void MainWindow::datasource(SDK::DatasourcePlugin *datasourcePlugin)
 {
     this->datasourcePlugin = datasourcePlugin;
 }
 
-DatasourcePlugin *MainWindow::datasource()
+SDK::DatasourcePlugin *MainWindow::datasource()
 {
     return this->datasourcePlugin;
 }
 
-void MainWindow::gui(GuiPluginObject *guiPlugin)
+void MainWindow::gui(SDK::GuiPluginObject *guiPlugin)
 {
     this->guiPlugin = guiPlugin;
 }
 
-GuiPluginObject *MainWindow::gui()
+SDK::GuiPluginObject *MainWindow::gui()
 {
     return  this->guiPlugin;
 }
 
-void MainWindow::player(MediaPlayerPluginObject *playerPlugin)
+void MainWindow::player(SDK::MediaPlayerPluginObject *playerPlugin)
 {
     this->playerPlugin = playerPlugin;
 }
 
-MediaPlayerPluginObject *MainWindow::player()
+SDK::MediaPlayerPluginObject *MainWindow::player()
 {
     return this->playerPlugin;
 }

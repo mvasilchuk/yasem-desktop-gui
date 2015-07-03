@@ -68,9 +68,9 @@ void PluginsDialog::updateTable()
     pluginsTable->setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Version")));
     pluginsTable->setHorizontalHeaderItem(3, new QTableWidgetItem(tr("Revision")));
 
-    QList<Plugin*> plugins = PluginManager::instance()->getPlugins(ROLE_ANY, false);
+    QList<SDK::Plugin*> plugins = SDK::PluginManager::instance()->getPlugins(SDK::ROLE_ANY, false);
     int row_index = 0;
-    for(Plugin* plugin: plugins)
+    for(SDK::Plugin* plugin: plugins)
     {
         pluginsTable->insertRow(pluginsTable->rowCount());
         QTableWidgetItem *nameItem = new QTableWidgetItem(plugin->getName());
@@ -81,7 +81,7 @@ void PluginsDialog::updateTable()
         activeItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | /*Qt::ItemIsEnabled | */ Qt::ItemIsTristate);
         if(plugin->isActive())
         {
-            if(plugin->getState() == PLUGIN_STATE_INITIALIZED)
+            if(plugin->getState() == SDK::PLUGIN_STATE_INITIALIZED)
                 activeItem->setCheckState(Qt::Checked);
             else
                 activeItem->setCheckState(Qt::PartiallyChecked);

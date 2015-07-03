@@ -11,13 +11,16 @@ class QStandardItem;
 
 namespace yasem
 {
+
+namespace SDK {
 class YasemSettings;
 class ConfigTreeGroup;
 class ConfigContainer;
 class ConfigItem;
+}
 
 struct ConfigContainerHelper {
-    ConfigContainer* container;
+    SDK::ConfigContainer* container;
 };
 
 class SettingsDialog : public QDialog
@@ -31,14 +34,14 @@ protected:
     void changeEvent(QEvent *e);
     void setupDialog();
     void updateConfigGroups();
-    QStandardItem* addTreeItem(ConfigTreeGroup* group);
+    QStandardItem* addTreeItem(SDK::ConfigTreeGroup* group);
 
 public slots:
     void updateConfigPage(const QModelIndex &index);
     void cancel();
 
 protected slots:
-     ConfigItem* getItemFromObject(QObject* object);
+     SDK::ConfigItem* getItemFromObject(QObject* object);
 
      void onConfigDataTextChanged(const QString &text);
      void onConfigDataBoolChanged(bool checked);
@@ -47,7 +50,7 @@ protected slots:
 protected:
 
 
-    YasemSettings* m_settings;
+    SDK::YasemSettings* m_settings;
     QVBoxLayout* m_root_vbox;
     QTreeView* m_config_groups_tree;
     QWidget* m_config_items_container;

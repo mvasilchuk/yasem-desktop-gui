@@ -9,8 +9,8 @@
 
 using namespace yasem;
 
-DesktopGuiObject::DesktopGuiObject(Plugin* plugin):
-    GuiPluginObject(plugin)
+DesktopGuiObject::DesktopGuiObject(SDK::Plugin* plugin):
+    SDK::GuiPluginObject(plugin)
 {
 
 }
@@ -57,9 +57,9 @@ QRect DesktopGuiObject::widgetRect()
     return m_main_window->windowInternalRect();
 }
 
-PluginObjectResult DesktopGuiObject::init()
+SDK::PluginObjectResult DesktopGuiObject::init()
 {
-    ProfileManager::instance()->loadProfiles();
+    SDK::ProfileManager::instance()->loadProfiles();
 
     setInitialized(true);
 
@@ -68,10 +68,10 @@ PluginObjectResult DesktopGuiObject::init()
     m_main_window->setAttribute(Qt::WA_QuitOnClose);
     m_main_window->show();
 
-    return PLUGIN_OBJECT_RESULT_OK;
+    return SDK::PLUGIN_OBJECT_RESULT_OK;
 }
 
-PluginObjectResult DesktopGuiObject::deinit()
+SDK::PluginObjectResult DesktopGuiObject::deinit()
 {
-    return PLUGIN_OBJECT_RESULT_OK;
+    return SDK::PLUGIN_OBJECT_RESULT_OK;
 }

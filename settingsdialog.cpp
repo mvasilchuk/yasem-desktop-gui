@@ -18,7 +18,7 @@ static const char* USER_DATA_PROP_KEY = "key";
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
-    m_settings(Core::instance()->yasem_settings()),
+    m_settings(SDK::Core::instance()->yasem_settings()),
     m_root_vbox(new QVBoxLayout(this)),
     m_config_groups_tree(new QTreeView(this)),
     m_config_items_container(new QWidget(this)),
@@ -102,17 +102,17 @@ void SettingsDialog::setupDialog()
 
 void SettingsDialog::updateConfigGroups()
 {
-    QHash<const QString&, ConfigTreeGroup*> groups = m_settings->getConfigGroups();
+    QHash<const QString&, SDK::ConfigTreeGroup*> groups = m_settings->getConfigGroups();
 
     m_tree_view_model->clear();
-    for(ConfigTreeGroup* group: groups)
+    for(SDK::ConfigTreeGroup* group: groups)
     {
         m_tree_view_model->appendRow(addTreeItem(group));
     }
     m_tree_view_model->sort(0);
 }
 
-QStandardItem *SettingsDialog::addTreeItem(ConfigTreeGroup *group)
+QStandardItem *SettingsDialog::addTreeItem(SDK::ConfigTreeGroup *group)
 {
     Q_ASSERT(group != NULL);
     QStandardItem* row_item = new QStandardItem(group->getTitle());
@@ -122,16 +122,16 @@ QStandardItem *SettingsDialog::addTreeItem(ConfigTreeGroup *group)
     DEBUG() << "setData" << QVariant::fromValue(group) << group->getTitle();
     row_item->setEditable(false);
 
-    for(ConfigItem* item: group->getItems())
+    for(SDK::ConfigItem* item: group->getItems())
     {
         DEBUG() << "Subitem" << item << item->getKey() << item->isContainer();
         if(item->isContainer())
         {
-            ConfigContainer* container = dynamic_cast<ConfigContainer*>(item);
+            SDK::ConfigContainer* container = dynamic_cast<SDK::ConfigContainer*>(item);
             Q_ASSERT(container);
-            if(container->getContainerType() == ConfigContainer::CONFIG_GROUP)
+            if(container->getContainerType() == SDK::ConfigContainer::CONFIG_GROUP)
             {
-                ConfigTreeGroup* tree_group = dynamic_cast<ConfigTreeGroup*>(container);
+                SDK::ConfigTreeGroup* tree_group = dynamic_cast<SDK::ConfigTreeGroup*>(container);
                 row_item->appendRow(addTreeItem(tree_group));
             }
         }
@@ -151,7 +151,7 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
     }
 
     QVariant data = m_tree_view_model->itemFromIndex(index)->data();
-    ConfigContainer* container = dynamic_cast<ConfigContainer*>(data.value<ConfigContainerHelper>().container);
+    SDK::ConfigContainer* container = dynamic_cast<SDK::ConfigContainer*>(data.value<ConfigContainerHelper>().container);
 
     if(container == NULL)
     {
@@ -162,14 +162,14 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
     m_settings->load(container);
 
     int row_index = 0;
-    for(ConfigItem* item: container->getItems())
+    for(SDK::ConfigItem* item: container->getItems())
     {
         switch(item->getType())
         {
-            case ConfigItem::STRING:
-            case ConfigItem::INT:
-            case ConfigItem::LONG:
-            case ConfigItem::DOUBLE:
+            case SDK::ConfigItem::STRING:
+            case SDK::ConfigItem::INT:
+            case SDK::ConfigItem::LONG:
+            case SDK::ConfigItem::DOUBLE:
             {
                 QLabel* label = new QLabel(item->getTitle());
                 layout->addWidget(label, row_index, 0);
@@ -179,15 +179,15 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
 
                 switch(item->getType())
                 {
-                    case ConfigItem::INT: {
+                    case SDK::ConfigItem::INT: {
                         line_edit->setValidator( new QIntValidator(this) );
                         break;
                     }
-                    case ConfigItem::LONG: {
+                    case SDK::ConfigItem::LONG: {
                         line_edit->setValidator( new QIntValidator(this) );
                         break;
                     }
-                    case ConfigItem::DOUBLE: {
+                    case SDK::ConfigItem::DOUBLE: {
                         line_edit->setValidator( new QDoubleValidator(this) );
                         break;
                     }
@@ -198,7 +198,7 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
                 layout->addWidget(line_edit, row_index, 1);
                 break;
             }
-            case ConfigItem::BOOL: {
+            case SDK::ConfigItem::BOOL: {
                 QLabel* label = new QLabel(item->getTitle());
                 layout->addWidget(label, row_index, 0);
 
@@ -209,12 +209,12 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
                 layout->addWidget(check_box, row_index, 1);
                 break;
             }
-            case ConfigItem::LIST: {
+            case SDK::ConfigItem::LIST: {
                 QLabel* label = new QLabel(item->getTitle());
                 layout->addWidget(label, row_index, 0);
 
                 QComboBox* combo_box = new QComboBox(m_config_items_container);
-                ListConfigItem* list_item = dynamic_cast<ListConfigItem*>(item);
+                SDK::ListConfigItem* list_item = dynamic_cast<SDK::ListConfigItem*>(item);
                 for(const QString& title: list_item->options().keys())
                 {
                     QString value = list_item->options().value(title).toString();
@@ -240,7 +240,7 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
 
 void SettingsDialog::onConfigDataTextChanged(const QString &text)
 {
-    ConfigItem* item = getItemFromObject(sender());
+    SDK::ConfigItem* item = getItemFromObject(sender());
     if(item == NULL) return;
 
     DEBUG() << item->getTitle() << "changed" << text;
@@ -250,7 +250,7 @@ void SettingsDialog::onConfigDataTextChanged(const QString &text)
 
 void SettingsDialog::onConfigDataBoolChanged(bool checked)
 {
-    ConfigItem* item = getItemFromObject(sender());
+    SDK::ConfigItem* item = getItemFromObject(sender());
     if(item == NULL) return;
 
     DEBUG() << item->getTitle() << "changed" << checked;
@@ -260,7 +260,7 @@ void SettingsDialog::onConfigDataBoolChanged(bool checked)
 
 void SettingsDialog::onConfigDataListItemChanged(int index)
 {
-    ConfigItem* item = getItemFromObject(sender());
+    SDK::ConfigItem* item = getItemFromObject(sender());
     if(item == NULL) return;
     QComboBox* combo_box = qobject_cast<QComboBox*>(sender());
 
@@ -276,11 +276,11 @@ void SettingsDialog::cancel()
     close();
 }
 
-ConfigItem* SettingsDialog::getItemFromObject(QObject *object)
+SDK::ConfigItem* SettingsDialog::getItemFromObject(QObject *object)
 {
     QWidget* widget = qobject_cast<QWidget*>(object);
 
-    ConfigItem* config_item = dynamic_cast<ConfigItem*>(widget->property(USER_DATA_PROP_KEY).value<QObject*>());
+    SDK::ConfigItem* config_item = dynamic_cast<SDK::ConfigItem*>(widget->property(USER_DATA_PROP_KEY).value<QObject*>());
     if(config_item == NULL)
     {
         WARN() << "No configuration item is set to object" << widget;

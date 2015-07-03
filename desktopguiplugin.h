@@ -8,14 +8,13 @@
 
 class QMenu;
 
-namespace yasem
-{
+namespace yasem {
 
-class DESKTOPGUISHARED_EXPORT DesktopGuiPlugin: public Plugin
+class DESKTOPGUISHARED_EXPORT DesktopGuiPlugin: public SDK::Plugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "com.mvas.yasem.DesktopGuiPlugin/1.0" FILE "metadata.json")
-    Q_INTERFACES(yasem::Plugin)
+    Q_INTERFACES(yasem::SDK::Plugin)
 
     Q_CLASSINFO("author", "Maxim Vasilchuk")
     Q_CLASSINFO("description", "Desktop GUI")

@@ -115,24 +115,29 @@ void SettingsDialog::updateConfigGroups()
 QStandardItem *SettingsDialog::addTreeItem(SDK::ConfigTreeGroup *group)
 {
     Q_ASSERT(group != NULL);
-    QStandardItem* row_item = new QStandardItem(group->getTitle());
+    QString title = group->getTitle();
+    QStandardItem* row_item = new QStandardItem(group->isEnabled() ? title : title.append(tr(" (not active)")));
+    row_item->setEnabled(group->isEnabled());
     ConfigContainerHelper helper;
     helper.container = group;
     row_item->setData(QVariant::fromValue(helper));
     DEBUG() << "setData" << QVariant::fromValue(group) << group->getTitle();
     row_item->setEditable(false);
 
-    for(SDK::ConfigItem* item: group->getItems())
+    if(group->isEnabled())
     {
-        DEBUG() << "Subitem" << item << item->getKey() << item->isContainer();
-        if(item->isContainer())
+        for(SDK::ConfigItem* item: group->getItems())
         {
-            SDK::ConfigContainer* container = dynamic_cast<SDK::ConfigContainer*>(item);
-            Q_ASSERT(container);
-            if(container->getContainerType() == SDK::ConfigContainer::CONFIG_GROUP)
+            DEBUG() << "Subitem" << item << item->getKey() << item->isContainer();
+            if(item->isContainer())
             {
-                SDK::ConfigTreeGroup* tree_group = dynamic_cast<SDK::ConfigTreeGroup*>(container);
-                row_item->appendRow(addTreeItem(tree_group));
+                SDK::ConfigContainer* container = dynamic_cast<SDK::ConfigContainer*>(item);
+                Q_ASSERT(container);
+                if(container->getContainerType() == SDK::ConfigContainer::CONFIG_GROUP)
+                {
+                    SDK::ConfigTreeGroup* tree_group = dynamic_cast<SDK::ConfigTreeGroup*>(container);
+                    row_item->appendRow(addTreeItem(tree_group));
+                }
             }
         }
     }
@@ -172,6 +177,7 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
             case SDK::ConfigItem::DOUBLE:
             {
                 QLabel* label = new QLabel(item->getTitle());
+                label->setEnabled(item->isEnabled());
                 layout->addWidget(label, row_index, 0);
 
                 QLineEdit* line_edit = new QLineEdit(m_config_items_container);
@@ -194,23 +200,27 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
                 }
 
                 line_edit->setProperty(USER_DATA_PROP_KEY, QVariant::fromValue(item));
+                line_edit->setEnabled(item->isEnabled());
                 connect(line_edit, &QLineEdit::textEdited, this, &SettingsDialog::onConfigDataTextChanged);
                 layout->addWidget(line_edit, row_index, 1);
                 break;
             }
             case SDK::ConfigItem::BOOL: {
                 QLabel* label = new QLabel(item->getTitle());
+                label->setEnabled(item->isEnabled());
                 layout->addWidget(label, row_index, 0);
 
                 QCheckBox* check_box = new QCheckBox(m_config_items_container);
                 check_box->setChecked(item->getValue().toBool());
                 check_box->setProperty(USER_DATA_PROP_KEY, QVariant::fromValue(item));
+                check_box->setEnabled(item->isEnabled());
                 connect(check_box, &QCheckBox::toggled, this, &SettingsDialog::onConfigDataBoolChanged);
                 layout->addWidget(check_box, row_index, 1);
                 break;
             }
             case SDK::ConfigItem::LIST: {
                 QLabel* label = new QLabel(item->getTitle());
+                label->setEnabled(item->isEnabled());
                 layout->addWidget(label, row_index, 0);
 
                 QComboBox* combo_box = new QComboBox(m_config_items_container);
@@ -223,6 +233,7 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
                 }
                 combo_box->setCurrentIndex(combo_box->findData(item->getValue()));
                 combo_box->setProperty(USER_DATA_PROP_KEY, QVariant::fromValue(item));
+                combo_box->setEnabled(item->isEnabled());
                 connect(combo_box, SIGNAL(currentIndexChanged(int)), this, SLOT(onConfigDataListItemChanged(int)));
                 layout->addWidget(combo_box, row_index, 1);
                 break;

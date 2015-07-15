@@ -2,7 +2,7 @@
 #define DESKTOPGUI_H
 
 #include "desktopgui_global.h"
-#include "guipluginobject.h"
+#include "gui.h"
 #include "plugin.h"
 #include <QMetaClassInfo>
 

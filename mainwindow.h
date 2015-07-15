@@ -19,10 +19,10 @@ namespace yasem {
 
 namespace SDK {
 class DesktopGuiPlugin;
-class BrowserPluginObject;
+class Browser;
 class DatasourcePlugin;
-class GuiPluginObject;
-class MediaPlayerPluginObject;
+class GUI;
+class MediaPlayer;
 class NetworkStatistics;
 }
 
@@ -36,17 +36,17 @@ public:
 
     void initialize();
 
-    virtual void browser(SDK::BrowserPluginObject* browserPlugin);
-    virtual SDK::BrowserPluginObject* browser();
+    virtual void browser(SDK::Browser* browserPlugin);
+    virtual SDK::Browser* browser();
 
     virtual void datasource(SDK::DatasourcePlugin* datasourcePlugin);
     virtual SDK::DatasourcePlugin* datasource();
 
-    virtual void gui(SDK::GuiPluginObject* guiPlugin);
-    virtual SDK::GuiPluginObject* gui();
+    virtual void gui(SDK::GUI* guiPlugin);
+    virtual SDK::GUI* gui();
 
-    virtual void player(SDK::MediaPlayerPluginObject* playerPlugin);
-    virtual SDK::MediaPlayerPluginObject* player();
+    virtual void player(SDK::MediaPlayer* playerPlugin);
+    virtual SDK::MediaPlayer* player();
 
      QList<QMenu*> getMenuItems();
      QRect windowInternalRect();
@@ -63,10 +63,10 @@ private:
     QToolBar* statusBarPanel;
     QStatusBar *statusBar;
 
-    SDK::BrowserPluginObject* browserPlugin;
+    SDK::Browser* browserPlugin;
     SDK::DatasourcePlugin *datasourcePlugin;
-    SDK::GuiPluginObject* guiPlugin;
-    SDK::MediaPlayerPluginObject* playerPlugin;
+    SDK::GUI* guiPlugin;
+    SDK::MediaPlayer* playerPlugin;
 
     QScrollArea* errorScrollArea;
     QGroupBox* errorGroupBox;

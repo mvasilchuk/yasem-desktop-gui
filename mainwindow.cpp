@@ -3,18 +3,18 @@
 #include "desktopguiplugin.h"
 #include "core.h"
 #include "profilemanager.h"
-#include "browserpluginobject.h"
+#include "browser.h"
 #include "stbprofile.h"
 #include "pluginsdialog.h"
 #include "aboutappdialog.h"
-#include "mediaplayerpluginobject.h"
+#include "mediaplayer.h"
 #include "settingsdialog.h"
 #include "openglwidgetcontainer.h"
 #include "networkstatistics.h"
 #include "statistics.h"
-#include "yasemsettings.h"
+#include "config.h"
 #include "configuration_items.h"
-#include "abstractwebpage.h"
+#include "webpage.h"
 #include "datasourceplugin.h"
 
 #include <QHBoxLayout>
@@ -112,11 +112,13 @@ void MainWindow::setupGui()
     centralWidget = new QWidget(this);
 #endif //USE_OPENGL_RENDER
     QStackedLayout* stackedLayout = new QStackedLayout;
+    centralWidget->setLayout(stackedLayout);
+    this->setCentralWidget(centralWidget);
 
     if(browser())
     {
         browser()->setParentWidget(centralWidget);
-        SDK::AbstractWebPage* page = browser()->createNewPage();
+        SDK::WebPage* page = browser()->createNewPage();
         stackedLayout->addWidget(page->widget());
     }
     else
@@ -132,11 +134,8 @@ void MainWindow::setupGui()
     else
         WARN() << "No mediplayer plugin found. Media will be disabled!";
 
-    centralWidget->setLayout(stackedLayout);
-    this->setCentralWidget(centralWidget);
-
     if(browser())
-        browser()->setTopWidget(SDK::BrowserPluginObject::TOP_WIDGET_BROWSER);
+        browser()->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
 
     browser()->widget()->raise();
 
@@ -495,9 +494,9 @@ void MainWindow::initialize()
     DEBUG() << "MainWindow::initialize()";
 
     datasource(__get_plugin<SDK::DatasourcePlugin*>(SDK::ROLE_DATASOURCE));
-    player(__get_plugin<SDK::MediaPlayerPluginObject*>(SDK::ROLE_MEDIA));
-    gui(__get_plugin<SDK::GuiPluginObject*>(SDK::ROLE_GUI));
-    browser(__get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER));
+    player(__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA));
+    gui(__get_plugin<SDK::GUI*>(SDK::ROLE_GUI));
+    browser(__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER));
 
     setupGui();
     setupMenu();
@@ -724,12 +723,12 @@ void MainWindow::resizeWebView()
     if(player() && player()->isInitialized())  player()->resize();
 }
 
-void MainWindow::browser(SDK::BrowserPluginObject *browserPlugin)
+void MainWindow::browser(SDK::Browser *browserPlugin)
 {
     this->browserPlugin = browserPlugin;
 }
 
-SDK::BrowserPluginObject *MainWindow::browser()
+SDK::Browser *MainWindow::browser()
 {
     return this->browserPlugin;
 }
@@ -744,22 +743,22 @@ SDK::DatasourcePlugin *MainWindow::datasource()
     return this->datasourcePlugin;
 }
 
-void MainWindow::gui(SDK::GuiPluginObject *guiPlugin)
+void MainWindow::gui(SDK::GUI *guiPlugin)
 {
     this->guiPlugin = guiPlugin;
 }
 
-SDK::GuiPluginObject *MainWindow::gui()
+SDK::GUI *MainWindow::gui()
 {
     return  this->guiPlugin;
 }
 
-void MainWindow::player(SDK::MediaPlayerPluginObject *playerPlugin)
+void MainWindow::player(SDK::MediaPlayer *playerPlugin)
 {
     this->playerPlugin = playerPlugin;
 }
 
-SDK::MediaPlayerPluginObject *MainWindow::player()
+SDK::MediaPlayer *MainWindow::player()
 {
     return this->playerPlugin;
 }

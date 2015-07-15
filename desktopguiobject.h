@@ -1,7 +1,7 @@
 #ifndef DESKTOPGUIOBJECT_H
 #define DESKTOPGUIOBJECT_H
 
-#include "guipluginobject.h"
+#include "gui.h"
 
 #include <QObject>
 
@@ -14,7 +14,7 @@ class Profile;
 class Plugin;
 }
 
-class DesktopGuiObject: public SDK::GuiPluginObject
+class DesktopGuiObject: public SDK::GUI
 {
 public:
     DesktopGuiObject(SDK::Plugin* plugin);

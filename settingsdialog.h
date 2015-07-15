@@ -13,7 +13,7 @@ namespace yasem
 {
 
 namespace SDK {
-class YasemSettings;
+class Config;
 class ConfigTreeGroup;
 class ConfigContainer;
 class ConfigItem;
@@ -50,7 +50,7 @@ protected slots:
 protected:
 
 
-    SDK::YasemSettings* m_settings;
+    SDK::Config* m_settings;
     QVBoxLayout* m_root_vbox;
     QTreeView* m_config_groups_tree;
     QWidget* m_config_items_container;

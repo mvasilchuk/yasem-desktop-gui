@@ -10,7 +10,7 @@
 using namespace yasem;
 
 DesktopGuiObject::DesktopGuiObject(SDK::Plugin* plugin):
-    SDK::GuiPluginObject(plugin)
+    SDK::GUI(plugin)
 {
 
 }

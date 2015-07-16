@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include "profilemanager.h"
 #include "macros.h"
+#include "plugin.h"
 
 #include <QRect>
 
@@ -30,11 +31,13 @@ void DesktopGuiObject::setWindowRect(const QRect &rect)
     MainWindow* wnd = this->m_main_window;
     DEBUG() << rect;
     wnd->setGeometry(rect);
+    emit windowRectChanged(rect);
 }
 
 void DesktopGuiObject::setFullscreen(bool fullscreen)
 {
     this->m_main_window->setAppFullscreen(fullscreen);
+    emit fullScreenModeChanged(fullscreen);
 }
 
 bool DesktopGuiObject::getFullscreen()
@@ -67,6 +70,8 @@ SDK::PluginObjectResult DesktopGuiObject::init()
     m_main_window->initialize();
     m_main_window->setAttribute(Qt::WA_QuitOnClose);
     m_main_window->show();
+
+    connect(plugin(), &SDK::Plugin::initialized, m_main_window, &MainWindow::loadStartPortal);
 
     return SDK::PLUGIN_OBJECT_RESULT_OK;
 }

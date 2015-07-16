@@ -107,6 +107,7 @@ public slots:
     void showNotificationIcon(bool show);
     void showStatistics(bool show);
     void updateStatistics();
+    void loadStartPortal();
 
 signals:
     void fullScreenModeToggled(bool fullscreen);

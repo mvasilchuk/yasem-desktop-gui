@@ -16,6 +16,7 @@
 #include "configuration_items.h"
 #include "webpage.h"
 #include "datasourceplugin.h"
+#include "pluginmanager.h"
 
 #include <QHBoxLayout>
 #include <QStackedLayout>
@@ -72,7 +73,8 @@ MainWindow::MainWindow(QWidget *parent) :
                     << SETTINGS_GROUP_OTHER
                     << NETWORK_STATISTICS
                     << NETWORK_STATISTICS_ENABLED)
-            ->value().toBool();
+            ->value().toBool();  
+
 }
 
 void MainWindow::setupGui()
@@ -493,10 +495,10 @@ void MainWindow::initialize()
 {
     DEBUG() << "MainWindow::initialize()";
 
-    datasource(__get_plugin<SDK::DatasourcePlugin*>(SDK::ROLE_DATASOURCE));
-    player(__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA));
-    gui(__get_plugin<SDK::GUI*>(SDK::ROLE_GUI));
-    browser(__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER));
+    datasource(SDK::__get_plugin<SDK::DatasourcePlugin*>(SDK::ROLE_DATASOURCE));
+    player(SDK::__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA));
+    gui(SDK::__get_plugin<SDK::GUI*>(SDK::ROLE_GUI));
+    browser(SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER));
 
     setupGui();
     setupMenu();
@@ -506,14 +508,6 @@ void MainWindow::initialize()
     {
         setAppFullscreen(true);
     }
-
-    QString configProfileSubmoduleId = "web-gui-config";
-
-    SDK::Profile* profile = SDK::ProfileManager::instance()->findById(configProfileSubmoduleId);
-    if(profile != NULL)
-        SDK::ProfileManager::instance()->setActiveProfile(profile);
-    else
-        WARN() << qPrintable(QString("Can't load Web GUI configuration profile"));
 }
 
 void MainWindow::resizeEvent(QResizeEvent * )
@@ -689,6 +683,17 @@ void MainWindow::updateStatistics()
     context->setContextProperty("network_failed_count", m_network_statistics->failedCount());
     context->setContextProperty("network_slow_count", m_network_statistics->tooSlowConnectionsCount());
     context->setContextProperty("network_pending_count", m_network_statistics->pendingConnectionsCount());
+}
+
+void MainWindow::loadStartPortal()
+{
+    QString configProfileSubmoduleId = "web-gui-config";
+
+    SDK::Profile* profile = SDK::ProfileManager::instance()->findById(configProfileSubmoduleId);
+    if(profile != NULL)
+        SDK::ProfileManager::instance()->setActiveProfile(profile);
+    else
+        WARN() << qPrintable(QString("Can't load Web GUI configuration profile"));
 }
 
 

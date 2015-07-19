@@ -4,5 +4,8 @@
         <file>missing_dependency_line.qml</file>
         <file>statistics_form.qml</file>
         <file>res/icons/statistics_icon.png</file>
+        <file>res/icons/ssl/plaintext.png</file>
+        <file>res/icons/ssl/encrypted.png</file>
+        <file>res/icons/ssl/decrypted.png</file>
     </qresource>
 </RCC>

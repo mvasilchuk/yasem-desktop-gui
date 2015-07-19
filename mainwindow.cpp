@@ -43,6 +43,8 @@
 
 using namespace yasem;
 
+const QString SSL_STATUS_PROPERTY = "ssl_status";
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_network_statistics(SDK::Core::instance()->statistics()->network()),
@@ -367,6 +369,8 @@ void MainWindow::setupMenu()
     m_menuItems.append(settingsMenu);
 }
 
+
+
 void MainWindow::setupStatusBar()
 {
     //Setup status bar
@@ -377,6 +381,21 @@ void MainWindow::setupStatusBar()
     statusBarPanel->setObjectName("statusBarPanel");
     statusBarPanel->addWidget(statusBar);
     statusBarPanel->setMovable(false);
+
+    m_ssl_status_btn = new QPushButton(statusBar);
+    m_ssl_status_btn->setFlat(true);
+
+    connect(browser(), &SDK::Browser::page_loading_started, [=](const QString& url) {
+        updateSslStatus(SDK::Browser::PLAINTEXT, url);
+    });
+    connect(browser(), &SDK::Browser::connection_encrypted, [=](const QString& url) {
+        updateSslStatus(SDK::Browser::ENCRYPTED, url);
+    });
+    connect(browser(), &SDK::Browser::encryption_error, [=](const QString& url, const QList<QSslError> &errors) {
+        updateSslStatus(SDK::Browser::SSL_ERROR, url, errors);
+    });
+
+    statusBar->addWidget(m_ssl_status_btn);
 
     currentProfileStatusBarLabel = new QLabel(statusBar);
     statusBar->addWidget(currentProfileStatusBarLabel);
@@ -694,6 +713,39 @@ void MainWindow::loadStartPortal()
         SDK::ProfileManager::instance()->setActiveProfile(profile);
     else
         WARN() << qPrintable(QString("Can't load Web GUI configuration profile"));
+}
+
+void MainWindow::updateSslStatus(SDK::Browser::SslStatus status, const QString &url, const QList<QSslError> &errors)
+{
+    if(status == m_ssl_status) return;
+
+    switch(status)
+    {
+        case SDK::Browser::PLAINTEXT: {
+            m_ssl_status_btn->setIcon(QIcon(":/res/icons/ssl/plaintext.png"));
+            m_ssl_status_btn->setToolTip(tr("Connection is not encrypted"));
+            break;
+        }
+        case SDK::Browser::ENCRYPTED: {
+            if(m_ssl_status == SDK::Browser::SSL_ERROR) return;
+
+            m_ssl_status_btn->setIcon(QIcon(":/res/icons/ssl/plaintext.png"));
+            m_ssl_status_btn->setToolTip(tr("Connection is not encrypted"));
+            break;
+        }
+        case SDK::Browser::SSL_ERROR: {
+            m_ssl_status_btn->setIcon(QIcon(":/res/icons/ssl/decrypted.png"));
+
+            QStringList list;
+            for(const QSslError& error: errors)
+            {
+               list.append(error.errorString());
+            }
+            m_ssl_status_btn->setToolTip(tr("Encryption error happened:<br>%1").arg(list.join("<br>")));
+            break;
+        }
+    }
+    m_ssl_status = status;
 }
 
 

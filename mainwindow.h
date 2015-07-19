@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "browser.h"
+
 #include <QMainWindow>
 
 #include <QMenu>
@@ -75,6 +77,7 @@ private:
     QLabel* currentProfileStatusBarLabel;
     QLabel* pageLoadingProgressStatusBarLabel;
     QQuickView* messageView;
+    QPushButton* m_ssl_status_btn;
     QPushButton* m_notification_icon;
 
 
@@ -83,6 +86,7 @@ private:
     bool m_opengl_enabled;
 
     QQuickWidget *m_statistics_view;
+    SDK::Browser::SslStatus m_ssl_status;
 
 public slots:
     void setupPalette();
@@ -108,6 +112,7 @@ public slots:
     void showStatistics(bool show);
     void updateStatistics();
     void loadStartPortal();
+    void updateSslStatus(SDK::Browser::SslStatus status, const QString& url, const QList<QSslError> &errors = QList<QSslError>());
 
 signals:
     void fullScreenModeToggled(bool fullscreen);

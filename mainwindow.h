@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "browser.h"
+#include "mediaplayer.h"
 
 #include <QMainWindow>
 
@@ -79,7 +80,7 @@ private:
     QQuickView* messageView;
     QPushButton* m_ssl_status_btn;
     QPushButton* m_notification_icon;
-
+    QLabel* m_notification_label;
 
     SDK::NetworkStatistics* m_network_statistics;
     bool m_network_statistics_enabled;
@@ -113,6 +114,8 @@ public slots:
     void updateStatistics();
     void loadStartPortal();
     void updateSslStatus(SDK::Browser::SslStatus status, const QString& url, const QList<QSslError> &errors = QList<QSslError>());
+    void onMediaPlayerError(SDK::MediaPlayer::MediaError error);
+    void writeStatusMessage(const QString& msg);
 
 signals:
     void fullScreenModeToggled(bool fullscreen);

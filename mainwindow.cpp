@@ -49,7 +49,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_network_statistics(SDK::Core::instance()->statistics()->network()),
     m_network_statistics_enabled(true),
-    m_opengl_enabled(SDK::Core::instance()->getVM() == SDK::Core::VM_NONE)
+    m_opengl_enabled(SDK::Core::instance()->getVM() == SDK::Core::VM_NONE),
+    m_ssl_status(SDK::Browser::SSL_UNDEFINED)
 {
     m_statistics_view = NULL;
 
@@ -450,6 +451,9 @@ void MainWindow::setupStatusBar()
     {
         LOG() << "Statistics widget will be disabled, because it doesn't work on virtual machines.";
     }
+
+    m_notification_label = new QLabel(statusBar);
+    statusBar->addWidget(m_notification_label);
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *e) {
@@ -522,6 +526,8 @@ void MainWindow::initialize()
     setupGui();
     setupMenu();
     setupStatusBar();
+
+    connect(player(), &SDK::MediaPlayer::errorHappened, this, &MainWindow::onMediaPlayerError);
 
     if(QCoreApplication::arguments().contains(SDK::arguments[SDK::FULLSCREEN_APP]))
     {
@@ -717,6 +723,7 @@ void MainWindow::loadStartPortal()
 
 void MainWindow::updateSslStatus(SDK::Browser::SslStatus status, const QString &url, const QList<QSslError> &errors)
 {
+    Q_UNUSED(url);
     if(status == m_ssl_status) return;
 
     switch(status)
@@ -729,8 +736,8 @@ void MainWindow::updateSslStatus(SDK::Browser::SslStatus status, const QString &
         case SDK::Browser::ENCRYPTED: {
             if(m_ssl_status == SDK::Browser::SSL_ERROR) return;
 
-            m_ssl_status_btn->setIcon(QIcon(":/res/icons/ssl/plaintext.png"));
-            m_ssl_status_btn->setToolTip(tr("Connection is not encrypted"));
+            m_ssl_status_btn->setIcon(QIcon(":/res/icons/ssl/encrypted.png"));
+            m_ssl_status_btn->setToolTip(tr("Connection to encrypted"));
             break;
         }
         case SDK::Browser::SSL_ERROR: {
@@ -744,10 +751,40 @@ void MainWindow::updateSslStatus(SDK::Browser::SslStatus status, const QString &
             m_ssl_status_btn->setToolTip(tr("Encryption error happened:<br>%1").arg(list.join("<br>")));
             break;
         }
+        default: {
+            break;
+        }
     }
     m_ssl_status = status;
 }
 
+void MainWindow::onMediaPlayerError(SDK::MediaPlayer::MediaError error)
+{
+    switch(error)
+    {
+        case SDK::MediaPlayer::MEDIA_ERROR_NO_ERROR: {
+            writeStatusMessage("OK");
+            break;
+        }
+        case SDK::MediaPlayer::MEDIA_ERROR_RESOURCE_BUSY: {
+            writeStatusMessage(tr("Media resource busy!"));
+            break;
+        }
+        case SDK::MediaPlayer::MEDIA_ERROR_SERVICE_MISSING: {
+            writeStatusMessage(tr("Media service missing!"));
+            break;
+        }
+        case SDK::MediaPlayer::MEDIA_ERROR_RESOURCE_ERROR: {
+            writeStatusMessage(tr("Media resource error!"));
+            break;
+        }
+    }
+}
+
+void MainWindow::writeStatusMessage(const QString &msg)
+{
+    m_notification_label->setText(msg);
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {

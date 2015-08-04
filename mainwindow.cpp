@@ -12,7 +12,7 @@
 #include "openglwidgetcontainer.h"
 #include "networkstatistics.h"
 #include "statistics.h"
-#include "config.h"
+#include "yasemsettings.h"
 #include "configuration_items.h"
 #include "webpage.h"
 #include "datasourceplugin.h"
@@ -299,10 +299,10 @@ void MainWindow::setupMenu()
         QList<AudioLangInfo> languages = player()->getAudioLanguages();
         for(const AudioLangInfo &lang: languages)
         {
-            QAction* action = new QAction(lang.code3, audioTrackMenu);
-            action->setData(lang.pid);
+            QAction* action = new QAction(lang.m_code3, audioTrackMenu);
+            action->setData(lang.m_pid);
             action->setCheckable(true);
-            action->setChecked(lang.pid == index);
+            action->setChecked(lang.m_pid == index);
             audioTrackMenu->addAction(action);
         }
     });
@@ -629,7 +629,7 @@ void MainWindow::checkDependencies()
 {
     QStringList lines;
 
-    for(SDK::Plugin* plugin: SDK::PluginManager::instance()->getPlugins(SDK::ROLE_ANY, false))
+    for(QSharedPointer<SDK::Plugin> plugin: SDK::PluginManager::instance()->getPlugins(SDK::ROLE_ANY, false))
     {
         QStringList list;
         for(SDK::PluginDependency dependency: plugin->dependencies())
@@ -819,42 +819,42 @@ void MainWindow::resizeWebView()
 
 void MainWindow::browser(SDK::Browser *browserPlugin)
 {
-    this->browserPlugin = browserPlugin;
+    this->m_browser_plugin = browserPlugin;
 }
 
 SDK::Browser *MainWindow::browser()
 {
-    return this->browserPlugin;
+    return this->m_browser_plugin;
 }
 
 void MainWindow::datasource(SDK::DatasourcePlugin *datasourcePlugin)
 {
-    this->datasourcePlugin = datasourcePlugin;
+    this->m_datasource_plugin = datasourcePlugin;
 }
 
 SDK::DatasourcePlugin *MainWindow::datasource()
 {
-    return this->datasourcePlugin;
+    return this->m_datasource_plugin;
 }
 
 void MainWindow::gui(SDK::GUI *guiPlugin)
 {
-    this->guiPlugin = guiPlugin;
+    this->m_gui_plugin = guiPlugin;
 }
 
 SDK::GUI *MainWindow::gui()
 {
-    return  this->guiPlugin;
+    return  this->m_gui_plugin;
 }
 
 void MainWindow::player(SDK::MediaPlayer *playerPlugin)
 {
-    this->playerPlugin = playerPlugin;
+    this->m_player_plugin = playerPlugin;
 }
 
 SDK::MediaPlayer *MainWindow::player()
 {
-    return this->playerPlugin;
+    return this->m_player_plugin;
 }
 
 QList<QMenu*> MainWindow::getMenuItems()

@@ -18,7 +18,7 @@ DesktopGuiObject::DesktopGuiObject(SDK::Plugin* plugin):
 
 DesktopGuiObject::~DesktopGuiObject()
 {
-
+    STUB();
 }
 
 QRect DesktopGuiObject::getWindowRect()

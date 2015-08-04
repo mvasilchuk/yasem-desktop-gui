@@ -1,6 +1,6 @@
 #include "settingsdialog.h"
 
-#include "config.h"
+#include "yasemsettings.h"
 #include "core.h"
 #include "macros.h"
 

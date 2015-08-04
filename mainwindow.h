@@ -66,10 +66,10 @@ private:
     QToolBar* statusBarPanel;
     QStatusBar *statusBar;
 
-    SDK::Browser* browserPlugin;
-    SDK::DatasourcePlugin *datasourcePlugin;
-    SDK::GUI* guiPlugin;
-    SDK::MediaPlayer* playerPlugin;
+    SDK::Browser* m_browser_plugin;
+    SDK::DatasourcePlugin *m_datasource_plugin;
+    SDK::GUI* m_gui_plugin;
+    SDK::MediaPlayer* m_player_plugin;
 
     QScrollArea* errorScrollArea;
     QGroupBox* errorGroupBox;

@@ -68,9 +68,9 @@ void PluginsDialog::updateTable()
     pluginsTable->setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Version")));
     pluginsTable->setHorizontalHeaderItem(3, new QTableWidgetItem(tr("Revision")));
 
-    QList<SDK::Plugin*> plugins = SDK::PluginManager::instance()->getPlugins(SDK::ROLE_ANY, false);
+    QList<QSharedPointer<SDK::Plugin>> plugins = SDK::PluginManager::instance()->getPlugins(SDK::ROLE_ANY, false);
     int row_index = 0;
-    for(SDK::Plugin* plugin: plugins)
+    for(QSharedPointer<SDK::Plugin> plugin: plugins)
     {
         pluginsTable->insertRow(pluginsTable->rowCount());
         QTableWidgetItem *nameItem = new QTableWidgetItem(plugin->getName());

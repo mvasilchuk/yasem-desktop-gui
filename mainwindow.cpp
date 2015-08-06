@@ -15,7 +15,7 @@
 #include "yasemsettings.h"
 #include "configuration_items.h"
 #include "webpage.h"
-#include "datasourceplugin.h"
+#include "datasourcefactory.h"
 #include "pluginmanager.h"
 
 #include <QHBoxLayout>
@@ -65,10 +65,10 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBarPanel = NULL;
     menuBar = NULL;
 
-    gui(NULL);
-    browser(NULL);
-    player(NULL);
-    datasource(NULL);
+    //gui();
+    //browser(NULL);
+    //player(NULL);
+    //datasource(NULL);
     messageView = NULL;
     m_notification_icon = NULL;
     m_network_statistics_enabled = SDK::Core::instance()->yasem_settings()->findItem(
@@ -177,14 +177,14 @@ void MainWindow::setupMenu()
     profilesMenu->addSection(tr("Profiles"));
 
     connect(profilesMenu, &QMenu::triggered, [=](QAction* action) {
-        SDK::Profile* profile = SDK::ProfileManager::instance()->findById(action->data().toString());
-        if(profile != NULL)
+        const QSharedPointer<SDK::Profile>& profile = SDK::ProfileManager::instance()->findById(action->data().toString());
+        if(profile.data() != NULL)
             SDK::ProfileManager::instance()->setActiveProfile(profile);
         else
             WARN() << qPrintable(QString("Can't load profile %1 from profiles menu!").arg(action->data().toString()));
     });
 
-    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](SDK::Profile* profile){
+    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](QSharedPointer<SDK::Profile> profile){
         for(QAction* action: profilesMenu->actions())
         {
             if(action->data().toString() == profile->getId())
@@ -199,7 +199,7 @@ void MainWindow::setupMenu()
         }
     });
 
-    for(SDK::Profile* profile: SDK::ProfileManager::instance()->getProfiles())
+    for(const QSharedPointer<SDK::Profile>& profile: SDK::ProfileManager::instance()->getProfiles())
     {
         if(!profile->hasFlag(SDK::Profile::HIDDEN))
         {
@@ -406,7 +406,7 @@ void MainWindow::setupStatusBar()
 
     this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
 
-    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](SDK::Profile* profile) {
+    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](QSharedPointer<SDK::Profile> profile) {
         currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
 
@@ -517,11 +517,6 @@ MainWindow::~MainWindow()
 void MainWindow::initialize()
 {
     DEBUG() << "MainWindow::initialize()";
-
-    datasource(SDK::__get_plugin<SDK::DatasourcePlugin*>(SDK::ROLE_DATASOURCE));
-    player(SDK::__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA));
-    gui(SDK::__get_plugin<SDK::GUI*>(SDK::ROLE_GUI));
-    browser(SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER));
 
     setupGui();
     setupMenu();
@@ -714,7 +709,7 @@ void MainWindow::loadStartPortal()
 {
     QString configProfileSubmoduleId = "web-gui-config";
 
-    SDK::Profile* profile = SDK::ProfileManager::instance()->findById(configProfileSubmoduleId);
+    const QSharedPointer<SDK::Profile>& profile = SDK::ProfileManager::instance()->findById(configProfileSubmoduleId);
     if(profile != NULL)
         SDK::ProfileManager::instance()->setActiveProfile(profile);
     else
@@ -817,44 +812,19 @@ void MainWindow::resizeWebView()
     if(player() && player()->isInitialized())  player()->resize();
 }
 
-void MainWindow::browser(SDK::Browser *browserPlugin)
+SDK::Browser* MainWindow::browser()
 {
-    this->m_browser_plugin = browserPlugin;
+    return SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
 }
 
-SDK::Browser *MainWindow::browser()
+SDK::GUI* MainWindow::gui()
 {
-    return this->m_browser_plugin;
+    return SDK::__get_plugin<SDK::GUI>(SDK::ROLE_GUI);
 }
 
-void MainWindow::datasource(SDK::DatasourcePlugin *datasourcePlugin)
+SDK::MediaPlayer* MainWindow::player()
 {
-    this->m_datasource_plugin = datasourcePlugin;
-}
-
-SDK::DatasourcePlugin *MainWindow::datasource()
-{
-    return this->m_datasource_plugin;
-}
-
-void MainWindow::gui(SDK::GUI *guiPlugin)
-{
-    this->m_gui_plugin = guiPlugin;
-}
-
-SDK::GUI *MainWindow::gui()
-{
-    return  this->m_gui_plugin;
-}
-
-void MainWindow::player(SDK::MediaPlayer *playerPlugin)
-{
-    this->m_player_plugin = playerPlugin;
-}
-
-SDK::MediaPlayer *MainWindow::player()
-{
-    return this->m_player_plugin;
+    return SDK::__get_plugin<SDK::MediaPlayer>(SDK::ROLE_MEDIA);
 }
 
 QList<QMenu*> MainWindow::getMenuItems()

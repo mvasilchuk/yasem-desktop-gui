@@ -23,7 +23,7 @@ namespace yasem {
 namespace SDK {
 class DesktopGuiPlugin;
 class Browser;
-class DatasourcePlugin;
+class Datasource;
 class GUI;
 class MediaPlayer;
 class NetworkStatistics;
@@ -39,16 +39,8 @@ public:
 
     void initialize();
 
-    virtual void browser(SDK::Browser* browserPlugin);
     virtual SDK::Browser* browser();
-
-    virtual void datasource(SDK::DatasourcePlugin* datasourcePlugin);
-    virtual SDK::DatasourcePlugin* datasource();
-
-    virtual void gui(SDK::GUI* guiPlugin);
     virtual SDK::GUI* gui();
-
-    virtual void player(SDK::MediaPlayer* playerPlugin);
     virtual SDK::MediaPlayer* player();
 
      QList<QMenu*> getMenuItems();
@@ -66,10 +58,10 @@ private:
     QToolBar* statusBarPanel;
     QStatusBar *statusBar;
 
-    SDK::Browser* m_browser_plugin;
-    SDK::DatasourcePlugin *m_datasource_plugin;
-    SDK::GUI* m_gui_plugin;
-    SDK::MediaPlayer* m_player_plugin;
+    QSharedPointer<SDK::Browser> m_browser_plugin;
+    QSharedPointer<SDK::Datasource> m_datasource_plugin;
+    QSharedPointer<SDK::GUI> m_gui_plugin;
+    QSharedPointer<SDK::MediaPlayer> m_player_plugin;
 
     QScrollArea* errorScrollArea;
     QGroupBox* errorGroupBox;

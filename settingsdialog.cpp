@@ -155,8 +155,8 @@ void SettingsDialog::updateConfigPage(const QModelIndex &index)
         delete child;
     }
 
-    QVariant data = m_tree_view_model->itemFromIndex(index)->data();
-    SDK::ConfigContainer* container = dynamic_cast<SDK::ConfigContainer*>(data.value<ConfigContainerHelper>().container);
+    QVariant model_data = m_tree_view_model->itemFromIndex(index)->data();
+    SDK::ConfigContainer* container = dynamic_cast<SDK::ConfigContainer*>(model_data.value<ConfigContainerHelper>().container);
 
     if(container == NULL)
     {

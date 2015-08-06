@@ -50,7 +50,7 @@ protected slots:
 protected:
 
 
-    SDK::Config* m_settings;
+    QSharedPointer<SDK::Config> m_settings;
     QVBoxLayout* m_root_vbox;
     QTreeView* m_config_groups_tree;
     QWidget* m_config_items_container;

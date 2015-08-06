@@ -30,7 +30,9 @@ HEADERS +=\
     aboutappdialog.h \
     desktopguiplugin.h \
     desktopguiobject.h \
-    openglwidgetcontainer.h
+    openglwidgetcontainer.h \
+    $${SDK_DIR}\browser.h \
+    $${SDK_DIR}\mediaplayer.h
 
 unix {
     target.path = /usr/lib

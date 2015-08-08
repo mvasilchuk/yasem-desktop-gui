@@ -37,7 +37,7 @@
 #include <QOpenGLContext>
 #include <QtQuickWidgets>
 
-#if (QT_VERSION >= 0x05040)
+#if (QT_VERSION >= 0x050400)
 #define USE_OPENGL_RENDER
 #endif
 

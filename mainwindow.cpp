@@ -92,12 +92,24 @@ void MainWindow::setupGui()
             // Enable OpenGL render
             centralWidget = new OpenGLWidgetContainer;
             QOpenGLWidget* opengl_widget = dynamic_cast<QOpenGLWidget*>(centralWidget);
-            if(!opengl_widget)  break;
+            if(!opengl_widget)
+            {
+                WARN() << "OpenGL widget not created!";
+                break;
+            }
+
             QOpenGLContext* opengl_context = opengl_widget->context();
-            if(!opengl_context) break;
+            if(!opengl_context)
+            {
+                WARN() << "Invalid OpenGL context!";
+                break;
+            }
             QPair<int,int> opengl_version = opengl_context->format().version();
             if(!opengl_widget->isValid() || opengl_version.first < 2) // Disable OpenGL for virtualbox
+            {
+                WARN() << "Invalid OpenGL version!";
                 break;
+            }
         } while(false);
 
         if(!opengl_windget_created)

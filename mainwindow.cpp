@@ -140,7 +140,6 @@ void MainWindow::setupGui()
     if(player() != NULL && player()->isInitialized())
     {
         player()->setAspectRatio(SDK::ASPECT_RATIO_AUTO);
-        player()->parent(centralWidget);
         stackedLayout->addWidget(player()->widget());
         player()->show();
     }

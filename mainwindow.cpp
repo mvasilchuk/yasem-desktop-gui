@@ -65,10 +65,6 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBarPanel = NULL;
     menuBar = NULL;
 
-    //gui();
-    //browser(NULL);
-    //player(NULL);
-    //datasource(NULL);
     messageView = NULL;
     m_notification_icon = NULL;
     m_network_statistics_enabled = SDK::Core::instance()->yasem_settings()->findItem(
@@ -76,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
                     << SETTINGS_GROUP_OTHER
                     << NETWORK_STATISTICS
                     << NETWORK_STATISTICS_ENABLED)
-            ->value().toBool();  
+            ->value().toBool();
 
 }
 
@@ -249,9 +245,7 @@ void MainWindow::setupMenu()
             SDK::AspectRatio ratio = (SDK::AspectRatio) action->data().toInt();
             if(ratio == current_ratio)
             {
-                aspectRatioMenu->setActiveAction(action);
                 action->setChecked(true);
-                break;
             }
             else
             {
@@ -826,17 +820,17 @@ void MainWindow::resizeWebView()
 
 SDK::Browser* MainWindow::browser()
 {
-    return SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
+    return SDK::Browser::instance();
 }
 
 SDK::GUI* MainWindow::gui()
 {
-    return SDK::__get_plugin<SDK::GUI>(SDK::ROLE_GUI);
+    return SDK::GUI::instance();
 }
 
 SDK::MediaPlayer* MainWindow::player()
 {
-    return SDK::__get_plugin<SDK::MediaPlayer>(SDK::ROLE_MEDIA);
+    return SDK::MediaPlayer::instance();
 }
 
 QList<QMenu*> MainWindow::getMenuItems()

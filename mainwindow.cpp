@@ -184,14 +184,14 @@ void MainWindow::setupMenu()
     profilesMenu->addSection(tr("Profiles"));
 
     connect(profilesMenu, &QMenu::triggered, [=](QAction* action) {
-        const QSharedPointer<SDK::Profile>& profile = SDK::ProfileManager::instance()->findById(action->data().toString());
-        if(profile.data() != NULL)
+        SDK::Profile* profile = SDK::ProfileManager::instance()->findById(action->data().toString());
+        if(profile != NULL)
             SDK::ProfileManager::instance()->setActiveProfile(profile);
         else
             WARN() << qPrintable(QString("Can't load profile %1 from profiles menu!").arg(action->data().toString()));
     });
 
-    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](QSharedPointer<SDK::Profile> profile){
+    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](SDK::Profile* profile){
         for(QAction* action: profilesMenu->actions())
         {
             if(action->data().toString() == profile->getId())
@@ -206,7 +206,7 @@ void MainWindow::setupMenu()
         }
     });
 
-    for(const QSharedPointer<SDK::Profile>& profile: SDK::ProfileManager::instance()->getProfiles())
+    for(const SDK::Profile* profile: SDK::ProfileManager::instance()->getProfiles())
     {
         if(!profile->hasFlag(SDK::Profile::HIDDEN))
         {
@@ -414,7 +414,7 @@ void MainWindow::setupStatusBar()
 
     this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
 
-    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](QSharedPointer<SDK::Profile> profile) {
+    connect(SDK::ProfileManager::instance(), &SDK::ProfileManager::profileChanged, [=](SDK::Profile* profile) {
         currentProfileStatusBarLabel->setText(tr("Profile:").append(profile->getName()));
     });
 
@@ -717,7 +717,7 @@ void MainWindow::loadStartPortal()
 {
     QString configProfileSubmoduleId = "web-gui-config";
 
-    const QSharedPointer<SDK::Profile>& profile = SDK::ProfileManager::instance()->findById(configProfileSubmoduleId);
+    SDK::Profile* profile = SDK::ProfileManager::instance()->findById(configProfileSubmoduleId);
     if(profile != NULL)
         SDK::ProfileManager::instance()->setActiveProfile(profile);
     else

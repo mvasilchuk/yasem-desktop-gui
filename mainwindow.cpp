@@ -326,6 +326,10 @@ void MainWindow::setupMenu()
     });
     settingsMenu->addAction(settingsAction);
 
+    QAction* showDevTools = new QAction(tr("Developer tools..."), settingsMenu);
+    connect(showDevTools, &QAction::triggered, SDK::Browser::instance(), &SDK::Browser::showDeveloperTools);
+    settingsMenu->addAction(showDevTools);
+
     QAction* toggleFullscreenAction = new QAction(tr("Fullscreen mode"), settingsMenu);
     toggleFullscreenAction->setCheckable(true);
     connect(this, &MainWindow::fullScreenModeToggled, [=](bool fullscreen){
@@ -335,7 +339,6 @@ void MainWindow::setupMenu()
          setAppFullscreen(!isFullScreen());
     });
     settingsMenu->addAction(toggleFullscreenAction);
-
 
     //About
 

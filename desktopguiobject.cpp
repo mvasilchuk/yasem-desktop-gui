@@ -80,3 +80,9 @@ SDK::PluginObjectResult DesktopGuiObject::deinit()
 {
     return SDK::PLUGIN_OBJECT_RESULT_OK;
 }
+
+
+QMainWindow *yasem::DesktopGuiObject::window()
+{
+    return m_main_window;
+}

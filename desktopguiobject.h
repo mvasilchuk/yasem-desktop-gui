@@ -29,6 +29,7 @@ public:
     void repaintGui();
     QList<QMenu *> getMenuItems();
     QRect widgetRect();
+    QMainWindow *window();
 
 protected:
     MainWindow* m_main_window;
@@ -39,6 +40,7 @@ protected:
 public:
     SDK::PluginObjectResult init();
     SDK::PluginObjectResult deinit();
+
 };
 
 }

@@ -125,14 +125,15 @@ void MainWindow::setupGui()
     centralWidget = new QWidget(this);
 #endif //USE_OPENGL_RENDER
     QStackedLayout* stackedLayout = new QStackedLayout;
+    stackedLayout->setObjectName("stackedLayout");
     centralWidget->setLayout(stackedLayout);
     this->setCentralWidget(centralWidget);
 
     if(browser())
     {
         browser()->setParentWidget(centralWidget);
-        SDK::WebPage* page = browser()->createNewPage();
-        stackedLayout->addWidget(page->widget());
+        browser()->setLayout(stackedLayout);
+        browser()->createNewPage();
     }
     else
         WARN() << "Browser plugin not found! The app may not work correctly!";
@@ -140,22 +141,25 @@ void MainWindow::setupGui()
     if(player() != NULL && player()->isInitialized())
     {
         player()->setAspectRatio(SDK::ASPECT_RATIO_AUTO);
+        player()->widget()->setParent(centralWidget);
         stackedLayout->addWidget(player()->widget());
         player()->show();
     }
     else
         WARN() << "No mediplayer plugin found. Media will be disabled!";
 
-    if(browser())
-        browser()->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
-
-    browser()->widget()->raise();
+    gui()->setTopWidget(SDK::GUI::TOP_WIDGET_BROWSER);
 
     setMouseTracking(true);
     if(browser())
         browser()->setupMousePositionHandler(this, SLOT(onMousePositionChanged(int)));
 
     resizeWebView();
+
+    for(QObject* widget: centralWidget->children())
+    {
+        DEBUG() << "Stack child" << widget;
+    }
 }
 
 void MainWindow::setupMenu()

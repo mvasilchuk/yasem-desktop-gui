@@ -38,6 +38,7 @@ public:
     void resizeEvent(QResizeEvent *event);
 
     void initialize();
+    void setupWindowSize();
 
     virtual SDK::Browser* browser();
     virtual SDK::GUI* gui();
@@ -52,6 +53,9 @@ protected:
 
     SDK::DesktopGuiPlugin* desktopGui;
     QList<QMenu*> m_menuItems;
+
+protected slots:
+    void mouseMoveEvent(QMouseEvent *e);
 
 private:
     QMenuBar *menuBar;
@@ -73,6 +77,7 @@ private:
     QPushButton* m_ssl_status_btn;
     QPushButton* m_notification_icon;
     QLabel* m_notification_label;
+    QSettings* m_settings;
 
     SDK::NetworkStatistics* m_network_statistics;
     bool m_network_statistics_enabled;
@@ -80,6 +85,7 @@ private:
 
     QQuickWidget *m_statistics_view;
     SDK::Browser::SslStatus m_ssl_status;
+    int m_mouse_border_threshold;
 
 public slots:
     void setupPalette();
@@ -94,12 +100,8 @@ public slots:
     void mouseDoubleClickEvent(QMouseEvent *e);
     void mousePressEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent *e);
-
     void setAppFullscreen(bool fullscreen);
-
     void addErrorToList(const QString &msg);
-    void onMousePositionChanged(int position);
-
     void checkDependencies();
     void showNotificationIcon(bool show);
     void showStatistics(bool show);

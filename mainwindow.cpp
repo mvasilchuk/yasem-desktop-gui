@@ -50,16 +50,12 @@ MainWindow::MainWindow(QWidget *parent) :
     m_network_statistics(SDK::Core::instance()->statistics()->network()),
     m_network_statistics_enabled(true),
     m_opengl_enabled(SDK::Core::instance()->getVM() == SDK::Core::VM_NONE),
-    m_ssl_status(SDK::Browser::SSL_UNDEFINED)
+    m_ssl_status(SDK::Browser::SSL_UNDEFINED),
+    m_settings(SDK::Core::instance()->settings()),
+    m_statistics_view(NULL),
+    m_mouse_border_threshold(0)
 {
-    m_statistics_view = NULL;
-
-    QSettings* settings = SDK::Core::instance()->settings();
-    settings->beginGroup("DesktopGui");
-    restoreGeometry(settings->value("geometry").toByteArray());
-    restoreState(settings->value("window_state").toByteArray());
-    settings->endGroup();
-
+    setupWindowSize();
     setupPalette();
 
     statusBarPanel = NULL;
@@ -127,6 +123,7 @@ void MainWindow::setupGui()
     QStackedLayout* stackedLayout = new QStackedLayout;
     stackedLayout->setObjectName("stackedLayout");
     centralWidget->setLayout(stackedLayout);
+    //centralWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     this->setCentralWidget(centralWidget);
 
     if(browser())
@@ -151,9 +148,6 @@ void MainWindow::setupGui()
     gui()->setTopWidget(SDK::GUI::TOP_WIDGET_BROWSER);
 
     setMouseTracking(true);
-    if(browser())
-        browser()->setupMousePositionHandler(this, SLOT(onMousePositionChanged(int)));
-
     resizeWebView();
 
     for(QObject* widget: centralWidget->children())
@@ -536,10 +530,45 @@ void MainWindow::initialize()
 
     connect(player(), &SDK::MediaPlayer::errorHappened, this, &MainWindow::onMediaPlayerError);
 
-    if(QCoreApplication::arguments().contains(SDK::arguments[SDK::FULLSCREEN_APP]))
+    if(QCoreApplication::arguments().contains(SDK::arguments[SDK::CMD_LINE_FULLSCREEN]))
     {
         setAppFullscreen(true);
     }
+}
+
+void MainWindow::setupWindowSize()
+{
+    m_settings->beginGroup("DesktopGui");
+    if(SDK::Core::instance()->arguments().contains("--window-size"))
+    {
+        const QString& value = SDK::Core::instance()->arguments().value("--window-size");
+        if(value == "auto")
+        {
+            setGeometry(qApp->desktop()->screenGeometry());
+        }
+        else
+        {
+            QStringList data = value.split("x");
+            if(data.length() == 2)
+            {
+                const int width = data[0].toInt();
+                const int height = data[1].toInt();
+                setGeometry(0, 0, width, height);
+            }
+            else
+            {
+                WARN() << "Incorrect agrument value" << value << ". '--window-size' value should be either WIDTHxHEIGHT or auto.";
+                restoreGeometry(m_settings->value("geometry").toByteArray());
+            }
+        }
+    }
+    else
+        restoreGeometry(m_settings->value("geometry").toByteArray());
+    restoreState(m_settings->value("window_state").toByteArray());
+
+    m_mouse_border_threshold = m_settings->value("mouse_border_threshold", 50).toInt();
+    m_settings->endGroup();
+
 }
 
 void MainWindow::resizeEvent(QResizeEvent * )
@@ -571,10 +600,57 @@ bool MainWindow::event(QEvent *event)
     }
     else if(event->type() == QEvent::MouseMove)
     {
-        event->ignore();
+        DEBUG() << "mouse";
+        //event->ignore();
     }
 
     return QMainWindow::event(event);
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *e)
+{
+    int position = SDK::MOUSE_POSITION::MIDDLE;
+
+    int y_pos = e->pos().y();
+    int x_pos = e->pos().x();
+    int height = this->height();
+    int width = this->width();
+
+    if(y_pos < (m_mouse_border_threshold))
+        position |= SDK::MOUSE_POSITION::TOP;
+    else if(y_pos > height - m_mouse_border_threshold)
+        position |= SDK::MOUSE_POSITION::BOTTOM;
+
+    if(x_pos < m_mouse_border_threshold)
+        position |= SDK::MOUSE_POSITION::LEFT;
+    else if(x_pos > width - m_mouse_border_threshold)
+        position |= SDK::MOUSE_POSITION::RIGHT;
+
+    if(isFullScreen())
+    {
+        bool bottom = (position & SDK::MOUSE_POSITION::BOTTOM) == SDK::MOUSE_POSITION::BOTTOM;
+
+        if(bottom && !statusBar->isVisible())
+        {
+            this->removeToolBar(statusBarPanel);
+            int stHeight = statusBarPanel->height();
+            statusBarPanel->setGeometry(0, this->height() - stHeight, this->width(), stHeight);
+            statusBarPanel->setStyleSheet("background:rgba(128, 128, 128, 0.2); color: black;");
+            statusBarPanel->raise();
+            statusBarPanel->show();
+        }
+        else if(!bottom && statusBar->isVisible())
+        {
+            statusBarPanel->setStyleSheet("");
+            this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
+            statusBarPanel->hide();
+            if(browser())
+                browser()->getParentWidget()->resize(this->size());
+            resizeWebView();
+        }
+    }
+
+    QMainWindow::mouseMoveEvent(e);
 }
 
 void MainWindow::setupPalette()
@@ -602,34 +678,6 @@ void MainWindow::setupPalette()
 
     qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
-}
-
-void MainWindow::onMousePositionChanged(int position)
-{
-
-    if(isFullScreen())
-    {
-        bool bottom = (position & SDK::MOUSE_POSITION::BOTTOM) == SDK::MOUSE_POSITION::BOTTOM;
-
-        if(bottom && !statusBar->isVisible())
-        {
-            this->removeToolBar(statusBarPanel);
-            int stHeight = statusBarPanel->height();
-            statusBarPanel->setGeometry(0, this->height() - stHeight, this->width(), stHeight);
-            statusBarPanel->setStyleSheet("background:rgba(128, 128, 128, 0.2); color: black;");
-            statusBarPanel->raise();
-            statusBarPanel->show();
-        }
-        else if(!bottom && statusBar->isVisible())
-        {
-            statusBarPanel->setStyleSheet("");
-            this->addToolBar(Qt::BottomToolBarArea, statusBarPanel);
-            statusBarPanel->hide();
-            if(browser())
-                browser()->getParentWidget()->resize(this->size());
-            resizeWebView();
-        }
-    }
 }
 
 void MainWindow::checkDependencies()

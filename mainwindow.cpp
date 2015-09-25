@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_network_statistics(SDK::Core::instance()->statistics()->network()),
     m_network_statistics_enabled(true),
-    m_opengl_enabled(SDK::Core::instance()->getVM() == SDK::Core::VM_NONE),
+    m_opengl_enabled(SDK::Core::instance()->featureAvailable(SDK::Core::FEATURE_OPENGL)),
     m_ssl_status(SDK::Browser::SSL_UNDEFINED),
     m_settings(SDK::Core::instance()->settings()),
     m_statistics_view(NULL),
@@ -113,7 +113,7 @@ void MainWindow::setupGui()
     }
     else
     {
-        DEBUG() << "Player doesn't support OpenGL rendering. Creating a QWidget renderer";
+        DEBUG() << "OpenGL is disabled or player doesn't support OpenGL rendering. Creating a QWidget renderer";
         centralWidget = new QWidget(this);
     }
 
@@ -600,8 +600,6 @@ bool MainWindow::event(QEvent *event)
     }
     else if(event->type() == QEvent::MouseMove)
     {
-        DEBUG() << "mouse";
-        //event->ignore();
     }
 
     return QMainWindow::event(event);
